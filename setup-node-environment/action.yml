@@ -30,7 +30,7 @@ runs:
         packageManager=$(jq -r '.packageManager' package.json)
         echo "packageManager: $packageManager"
         if [[ "$packageManager" == "pnpm"* ]]; then
-          echo "pnpm detected: $packageManager"
+          echo "setup-pnpm=true"
           echo "setup-pnpm=true" >> $GITHUB_OUTPUT
         fi
 
@@ -38,6 +38,8 @@ runs:
         if [[ -f "pnpm-lock.yaml" ]]; then
           echo "pnpm-lock.yaml exists"
           echo "pnpm-lock-exists=true" >> $GITHUB_OUTPUT
+        else
+          echo "pnpm-lock.yaml does not exist"
         fi
 
     - uses: pnpm/action-setup@v4 # https://github.com/pnpm/action-setup?tab=readme-ov-file#inputs
