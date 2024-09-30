@@ -11,29 +11,32 @@
 #       - name : 📦 Setup Node + PNPM + install deps
 #         uses: ./.github/actions/setup-node-pnpm-install
 
-name: 'Setup  Node + PNPM + Install Dependencies'
-description: 'Setup  Node + PNPM + Install Dependencies'
+name: "Setup  Node + PNPM + Install Dependencies"
+description: "Setup  Node + PNPM + Install Dependencies"
 runs:
-  using: 'composite'
+  using: "composite"
   steps:
     - uses: actions/checkout@main
+      with:
+        # fetch-depth: 0 # zero stands for full checkout, which is required for semantic-release
+        filter: blob:none # we don't need all blobs, only the full tree
+        show-progress: false
     - uses: pnpm/action-setup@v4
       with:
-        version: latest
+        # version: latest
         run_install: false
     - uses: actions/setup-node@v4
       with:
         node-version: lts/*
         # cache: 'pnpm'
-    - name: Check Node and PNPM versions
-      shell: bash
-      run: |
-        set -x
-        node --version
-        pnpm --version
-        pwd
-        ls -al
-      working-directory: ${{ github.workspace }}
+    # - name: Check Node and PNPM versions
+    #   shell: bash
+    #   run: |
+    #     set -x
+    #     node --version
+    #     pnpm --version
+    #     pwd
+    #     ls -al
     # - name: 📦 Install Project Dependencies
     #   run: pnpm install --frozen-lockfile
     #   shell: bash
