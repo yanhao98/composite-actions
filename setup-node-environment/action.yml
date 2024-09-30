@@ -11,8 +11,8 @@
 #       - name : 📦 Setup Node + PNPM + install deps
 #         uses: ./.github/actions/setup-node-pnpm-install
 
-name: "Setup  Node Environment"
-description: "Setup  Node + PNPM + Install Dependencies"
+name: "Setup Node Environment"
+description: "Setup pnpm + Node.js + install dependencies"
 runs:
   using: "composite"
   steps:
