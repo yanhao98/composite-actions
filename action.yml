@@ -6,6 +6,11 @@ runs:
     - name: Checkout
       id: checkout
       uses: actions/checkout@main
+    - name: 安装 pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: latest
+        run_install: false
     - uses: actions/setup-node@v4
       id: setup-node
       with:
