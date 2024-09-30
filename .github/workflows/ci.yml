@@ -14,3 +14,4 @@ jobs:
           pnpm --version
           date
           pwd
+          ls -al
