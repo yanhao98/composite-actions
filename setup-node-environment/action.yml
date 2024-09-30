@@ -38,6 +38,7 @@ runs:
         if [[ -f "pnpm-lock.yaml" ]]; then
           echo "pnpm-lock.yaml exists"
           echo "pnpm-lock-exists=true" >> $GITHUB_OUTPUT
+          echo "cache=pnpm" >> $GITHUB_OUTPUT
         else
           echo "pnpm-lock.yaml does not exist"
         fi
@@ -47,7 +48,7 @@ runs:
     - uses: actions/setup-node@v4 # https://github.com/actions/setup-node?tab=readme-ov-file#usage
       with:
         node-version: lts/*
-        # cache: 'pnpm' # TODO: 判断是否有pnpm-lock.yaml文件，有则启用缓存
+        cache: ${{ steps.prepare.outputs.cache }}
     - name: 📦 Install Project Dependencies
       if: steps.prepare.outputs.pnpm-lock-exists == 'true'
       run: pnpm install --frozen-lockfile
