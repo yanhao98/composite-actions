@@ -29,6 +29,8 @@ runs:
       run: |
         node --version
         pnpm --version
+        pwd
+        ls -al
     # - name: 📦 Install Project Dependencies
     #   run: pnpm install --frozen-lockfile
     #   shell: bash
