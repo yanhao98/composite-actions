@@ -1,0 +1,99 @@
+# - https://docs.docker.com/build/ci/github-actions/push-multi-registries/
+
+# - https://github.com/docker/build-push-action
+
+name: "打包推送 Docker 镜像"
+description: "打包 Docker 镜像并推送到 Docker Hub"
+inputs:
+  file:
+    description: "Dockerfile 文件路径"
+    default: "./Dockerfile"
+    required: false
+  context:
+    description: "Docker 构建上下文路径"
+    default: "."
+    required: false
+  platforms:
+    description: "Docker 构建平台"
+    default: "linux/amd64,linux/arm64"
+    required: false
+  push:
+    description: "是否推送 Docker 镜像"
+    default: "false"
+    required: false
+  load:
+    description: "是否加载 Docker 镜像"
+    default: "false"
+    required: false
+  meta_images:
+    description: "docker/metadata-action 的 images 参数"
+    required: false
+  meta_tags:
+    description: "docker/metadata-action 的 tags 参数"
+    required: false
+  cache-from:
+    description: "docker/build-push-action 的 cache-from 参数"
+    required: false
+  cache-to:
+    description: "docker/build-push-action 的 cache-to 参数"
+    required: false
+  build-args:
+    description: "Docker 构建参数，格式如: KEY1=VALUE1,KEY2=VALUE2"
+    required: false
+outputs:
+  imageid:
+    description: "Docker 镜像 ID"
+    value: ${{ steps.build.outputs.imageid }}
+runs:
+  using: "composite"
+  steps:
+    - name: echo Start
+      shell: bash
+      run: echo -e "\n[$(date +'%Y-%m-%d %H:%M:%S')] 🤖🤖🤖 Start 🤖🤖🤖"
+
+    - id: check-git-folder
+      shell: bash
+      run: |
+        #     🤖 判断是否存在 .git 文件夹 🤖
+        [ -d .git ] && { echo "🤖 Found .git folder"; echo "git-folder-exists=true" >> $GITHUB_OUTPUT; } || { echo "🤖 No .git folder found"; echo "git-folder-exists=false" >> $GITHUB_OUTPUT; }
+    - uses: actions/checkout@main
+      if: steps.check-git-folder.outputs.git-folder-exists == 'false'
+      with:
+        filter: blob:none
+        show-progress: false
+
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        context: git
+        # flavor
+        images: ${{ inputs.meta_images }}
+        tags: ${{ inputs.meta_tags }}
+        # sep-tags: ','
+        # sep-labels: ','
+
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v3
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build and push
+      id: build
+      uses: docker/build-push-action@v6
+      with:
+        file: ${{ inputs.file }}
+        context: ${{ inputs.context }}
+        platforms: ${{ inputs.platforms }}
+        push: ${{ inputs.push }}
+        load: ${{ inputs.load }}
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: ${{ inputs.cache-from }}
+        cache-to: ${{ inputs.cache-to }}
+        build-args: ${{ inputs.build-args }}
+
+    - name: echo End
+      shell: bash
+      run: echo -e "\n[$(date +'%Y-%m-%d %H:%M:%S')] 🤖🤖🤖 End 🤖🤖🤖"

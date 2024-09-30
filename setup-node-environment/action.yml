@@ -1,0 +1,224 @@
+# 🔗 链接:
+# 源文件: https://github.com/obytes/react-native-template-obytes/blob/master/.github/actions/setup-node-pnpm-install/action.yml
+# 复合操作文档: https://docs.github.com/en/actions/creating-actions/creating-a-composite-action
+
+# ✍️ 描述:
+# 这是一个复合操作，意味着它可以在其他操作中使用。
+# 它几乎用于所有工作流中，以设置环境并安装依赖项。
+# 在此处更新包管理器或 Node 版本将反映在所有工作流中。
+
+# 👀 使用示例:
+#       - name : 📦 设置 Node + PNPM + 安装依赖
+#         uses: ./.github/actions/setup-node-pnpm-install
+
+name: '设置 Node 环境'
+description: '设置 pnpm + Node.js + 安装依赖项'
+inputs:
+  pnpm_standalone: # 是否将 pnpm 用作独立包 https://github.com/pnpm/action-setup?tab=readme-ov-file#standalone
+    description: '是否将 pnpm 用作独立包'
+    required: false
+    default: 'false'
+  package_json_cwd: # https://github.com/pnpm/action-setup/blob/d648c2dd069001a242c621c8306af467f150e99d/action.yml#L18C3-L18C20
+    description: 'package.json 的所在目录'
+    required: false
+    default: '.'
+runs:
+  using: 'composite'
+  steps:
+    - id: check-git-folder
+      shell: bash
+      run: |
+        # 🤖----判断是否存在 .git 文件夹----🤖 #
+        [ -d ${{ github.workspace }}/.git ] && { echo "🤖 找到 .git 文件夹"; echo "git-folder-exists=true" >> $GITHUB_OUTPUT; } || { echo "🤖 未找到 .git 文件夹"; echo "git-folder-exists=false" >> $GITHUB_OUTPUT; }
+
+    - uses: actions/checkout@v4.2.2
+      if: steps.check-git-folder.outputs.git-folder-exists == 'false'
+      with:
+        # fetch-depth: 0 # 0 代表完整检出，semantic-release 需要
+        filter: blob:none # 我们不需要所有 blob，只需要完整的树
+        show-progress: false
+
+    - id: prepare
+      shell: bash
+      working-directory: ${{ inputs.package_json_cwd }}
+      run: |
+        # 🤖---- 准备环境变量 ----🤖 #
+
+        # --- 1. 包管理器 ---
+        echo "::group::📦 获取包管理器信息"
+        pkg_manager=$(node -p "try { require('./package.json').packageManager } catch(e) { '' }")
+        echo "从 package.json 获取的包管理器: $pkg_manager"
+        echo "::endgroup::"
+
+        # --- 2. 确定 PNPM 版本 ---
+        echo "::group::🔧 确定 PNPM 版本"
+        pnpm_version=""
+        # 如果 packageManager 为空、undefined 或 null，则使用最新的 pnpm
+        if [ -z "$pkg_manager" ] || [ "$pkg_manager" == "undefined" ] || [ "$pkg_manager" == "null" ]; then
+          pnpm_version="latest"
+          echo "未指定或无效的 packageManager，使用 pnpm 版本: latest"
+        else
+          # 如果指定了 pnpm 版本（例如 "pnpm@8.6.0"），则提取版本号
+          if [[ "$pkg_manager" == pnpm* ]]; then
+              pnpm_version=$(echo "$pkg_manager" | cut -d '@' -f 2)
+              echo "使用 package.json 中的 pnpm 版本: $pnpm_version"
+          else
+              echo "指定了非 pnpm 包管理器: $pkg_manager。将由 pnpm/action-setup 处理版本。"
+              # 让 pnpm/action-setup 根据 corepack 或其默认设置决定版本
+              pnpm_version="" # 如果不是 pnpm 或未正确指定，则显式设置为空
+          fi
+        fi
+        echo "::endgroup::"
+
+        # --- 3. 检查 PNPM 安装情况 ---
+        echo "::group::🔍 检查 PNPM 安装情况"
+        is_pnpm_installed="false"
+        pnpm_executable_path=""
+        installed_pnpm_version="无法获取" # 版本检查失败时的默认值
+
+        # 使用 command -v 检查 pnpm 是否在 PATH 中并且可执行
+        if command -v pnpm >/dev/null 2>&1; then
+            pnpm_executable_path=$(command -v pnpm)
+            echo "找到 PNPM 可执行文件于: $pnpm_executable_path"
+            # 尝试获取版本号，但不因失败而退出
+            if pnpm_version_output=$(pnpm --version 2>/dev/null); then
+                installed_pnpm_version="$pnpm_version_output"
+                is_pnpm_installed="true" # 确认 pnpm 可执行且能获取版本
+                echo "已安装的 PNPM 版本: $installed_pnpm_version"
+            else
+                # pnpm 命令存在但获取版本失败，可能安装不完整或有问题
+                is_pnpm_installed="true" # 标记为已安装，因为命令存在
+                echo "警告：PNPM 命令存在，但无法获取版本号。可能安装不完整或存在问题。"
+                echo "将继续执行，后续步骤可能会重新安装或修复。"
+            fi
+        else
+            echo "PNPM 未在 PATH 中找到或不可执行。"
+            is_pnpm_installed="false"
+        fi
+        echo "::endgroup::"
+
+        # --- 4. 检查 PNPM Lock 文件 ---
+        echo "::group::📄 检查 PNPM Lock 文件"
+        has_pnpm_lock="false"
+        if [ -f pnpm-lock.yaml ]; then
+            has_pnpm_lock="true"
+            echo "找到 pnpm-lock.yaml。"
+        else
+            echo "未找到 pnpm-lock.yaml。"
+        fi
+        echo "::endgroup::"
+
+        # --- 5. 确定 Node.js 版本并清理 .npmrc ---
+        echo "::group::⚙️ 确定 Node.js 版本并清理 .npmrc"
+        node_version="lts/*" # 默认 Node 版本
+        if [ ! -f .npmrc ]; then
+            echo "未找到 .npmrc，创建一个空文件。"
+            touch .npmrc
+        else
+            echo "找到 .npmrc 文件。"
+        fi
+
+        # 从 .npmrc 读取 use-node-version
+        node_version_in_npmrc=$(sed -n 's/.*use-node-version=\([0-9.]*\).*/\1/p' .npmrc)
+        if [ -n "$node_version_in_npmrc" ]; then
+            node_major_version_in_npmrc=$(echo "$node_version_in_npmrc" | cut -d. -f1)
+            if [ -n "$node_major_version_in_npmrc" ]; then
+                node_version="$node_major_version_in_npmrc"
+                echo ".npmrc 中指定的 Node 版本: $node_version_in_npmrc -> 使用主版本: $node_version"
+            else
+                echo "无法从 .npmrc ($node_version_in_npmrc) 提取主 Node 版本。使用默认值: $node_version"
+            fi
+        else
+            echo ".npmrc 中未找到 'use-node-version'。使用默认值: $node_version"
+        fi
+
+        # 清理 .npmrc：删除 use-node-version 和 node-mirror 行
+        echo "正在清理 .npmrc..."
+        # 使用 -i.bak 以兼容不同 sed 版本，并在创建备份后删除
+        sed -i.bak -e '/use-node-version/d' -e '/node-mirror/d' .npmrc
+        [ -f .npmrc.bak ] && rm .npmrc.bak
+        echo ".npmrc 已清理。"
+        echo "::endgroup::"
+
+        # --- 6. 设置输出 ---
+        echo "::group::🚀 设置 GitHub Actions 输出"
+        echo "packageManager=${pkg_manager}" >> $GITHUB_OUTPUT
+        echo "pnpmVersion=${pnpm_version}" >> $GITHUB_OUTPUT
+        echo "pnpmInstalled=${is_pnpm_installed}" >> $GITHUB_OUTPUT
+        echo "pnpmLockExists=${has_pnpm_lock}" >> $GITHUB_OUTPUT
+        echo "nodeVersion=${node_version}" >> $GITHUB_OUTPUT
+        echo "输出已设置:"
+        printf "  %-16s %s\n" "packageManager:" "${pkg_manager}"
+        printf "  %-16s %s\n" "pnpmVersion:" "${pnpm_version}"
+        printf "  %-16s %s\n" "pnpmInstalled:" "${is_pnpm_installed}"
+        printf "  %-16s %s\n" "pnpmLockExists:" "${has_pnpm_lock}"
+        printf "  %-16s %s\n" "nodeVersion:" "${node_version}"
+        echo "::endgroup::"
+
+    - uses: pnpm/action-setup@v4 # https://github.com/pnpm/action-setup?tab=readme-ov-file#inputs
+      if: steps.prepare.outputs.pnpmInstalled == 'false'
+      with:
+        version: ${{ steps.prepare.outputs.pnpmVersion }}
+        standalone: ${{ inputs.pnpm_standalone }}
+
+    - uses: actions/setup-node@v4 # https://github.com/actions/setup-node?tab=readme-ov-file#usage
+      with:
+        node-version: ${{ steps.prepare.outputs.nodeVersion }}
+        cache: ''
+
+    - id: pnpm-store-dir
+      shell: bash
+      run: |
+        echo "🤖---- 获取 PNPM 存储目录 ----🤖"
+        echo "PNPM 存储目录: $(pnpm store path)"
+        echo "pnpmStoreDir=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+    - id: cache-pnpm-restore
+      uses: actions/cache/restore@v4 # https://github.com/actions/cache/blob/main/restore/action.yml
+      with:
+        path: ${{ steps.pnpm-store-dir.outputs.pnpmStoreDir }}
+        key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+        restore-keys: |
+          ${{ runner.os }}-pnpm-store-
+
+    - run: echo "package-import-method=hardlink" >> .npmrc
+      shell: bash
+
+    - if: steps.cache-pnpm-restore.outputs.cache-hit == 'true'
+      working-directory: ${{ inputs.package_json_cwd }}
+      shell: bash
+      run: |
+        echo "🤖---- 缓存命中，安装依赖 ----🤖"
+        pnpm install --prefer-offline
+        #  --frozen-lockfile
+        # ERR_PNPM_NO_LOCKFILE  Cannot install with "frozen-lockfile" because pnpm-lock.yaml is absent
+
+    - if: steps.cache-pnpm-restore.outputs.cache-hit != 'true'
+      working-directory: ${{ inputs.package_json_cwd }}
+      shell: bash
+      run: |
+        echo "🤖---- 缓存未命中，安装依赖 ----🤖"
+        set -x;
+        pnpm fetch # https://pnpm.io/zh/cli/fetch
+        pnpm install --prefer-offline
+        #  --frozen-lockfile
+        # ERR_PNPM_NO_LOCKFILE  Cannot install with "frozen-lockfile" because pnpm-lock.yaml is absent
+        pnpm store prune
+
+    - id: cache-pnpm-save
+      if: always() && steps.cache-pnpm-restore.outputs.cache-hit == 'false'
+      uses: actions/cache/save@v4
+      with:
+        path: ${{ steps.pnpm-store-dir.outputs.pnpmStoreDir }}
+        key: ${{ steps.cache-pnpm-restore.outputs.cache-primary-key }}
+
+# # https://github.com/pnpm/pnpm/issues/7192#issuecomment-2353298966
+# package-import-method=hardlink
+
+# rm -r node_modules
+# pnpm fetch
+# pnpm install --offline
+# pnpm store prune
+# # 
+# rm -r node_modules
+# pnpm install --offline

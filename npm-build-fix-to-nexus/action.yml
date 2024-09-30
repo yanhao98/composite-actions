@@ -1,0 +1,71 @@
+name: '发布修复包到 Nexus'
+description: '发布 npm 修复包到 Nexus'
+inputs:
+  package_json_url:
+    description: 'package.json 文件的 URL'
+    required: true
+  pack_workspace:
+    description: '打包工作目录'
+    required: true
+  build_command:
+    description: '构建命令'
+    required: true
+  nexus_post_url:
+    description: 'Nexus URL'
+    required: true
+  nexus_auth:
+    description: 'Nexus 认证信息'
+    required: true
+runs:
+  using: 'composite'
+  steps:
+    - name: 下载 package.json 文件
+      shell: bash
+      run: wget ${{ inputs.package_json_url }} -O /tmp/package.json
+    - name: 更新版本号
+      shell: bash
+      run: |
+        # 获取当前版本
+        VERSION=$(node -p "require('/tmp/package.json').version")
+
+        # 分解版本号
+        IFS='.' read -r major minor patch <<< "$VERSION"
+
+        # 增加patch版本
+        new_patch=$((patch + 1))
+
+        # 生成新版本号基础部分
+        NEW_VERSION="$major.$minor.$new_patch"
+
+        # 添加-fix后缀
+        NEW_VERSION="$NEW_VERSION-fix"
+
+        # 添加时间戳
+        TIMESTAMP=$(date -u +"%Y%m%d%H%M")
+        NEW_VERSION="$NEW_VERSION.$TIMESTAMP"
+
+        echo "Current version: $VERSION"
+        echo "New version: $NEW_VERSION"
+
+        # 更新package.json中的版本号
+        sed -i "s/\"version\": \".*\"/\"version\": \"$NEW_VERSION\"/" /tmp/package.json
+    - uses: yanhao98/composite-actions/setup-node-environment@main
+    - name: 构建项目
+      shell: bash
+      run: ${{ inputs.build_command }}
+    - name: 打包 tgz
+      id: pack_tgz
+      working-directory: ${{ inputs.pack_workspace }}
+      shell: bash
+      run: |
+          rm -rf *.tgz
+          cp /tmp/package.json .
+          tgz=$(npm pack)
+          echo "tgz=$tgz" >> $GITHUB_OUTPUT
+    - name: 上传到 Nexus
+      working-directory: ${{ inputs.pack_workspace }}
+      shell: bash
+      run: |
+          curl -i -X POST "${{ inputs.nexus_post_url }}" \
+            -H "Authorization: Basic ${{ inputs.nexus_auth }}" \
+            -F "npm.asset=@${{ steps.pack_tgz.outputs.tgz }}"

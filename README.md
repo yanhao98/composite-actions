@@ -1,0 +1,1 @@
+- https://github.com/renovatebot/renovate/blob/81fc75630b0b43fb4b89a0b65c1086d487e65d2e/.github/actions/setup-node/action.yml

@@ -1,0 +1,26 @@
+on:
+  pull_request:
+    paths:
+      - "deploy-dist-to-surge/**"
+      - ".github/workflows/deploy-dist-to-surge-test.yaml"
+  push:
+    paths:
+      - "deploy-dist-to-surge/**"
+      - ".github/workflows/deploy-dist-to-surge-test.yaml"
+env:
+  TZ: Asia/Shanghai
+
+jobs:
+  job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 准备部署文件
+        run: |
+          mkdir dist
+          html="<!DOCTYPE html><html><body><h1>${{ github.event_name }}: ${{ github.sha }}</h1></body></html>"
+          echo $html > dist/index.html
+      - uses: yanhao98/composite-actions/deploy-dist-to-surge@main
+        id: surge_deploy
+      - name: Check Surge URL
+        run: |
+          echo "steps.surge_deploy.outputs.url: ${{ steps.surge_deploy.outputs.url }}"

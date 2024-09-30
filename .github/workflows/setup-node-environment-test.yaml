@@ -1,0 +1,133 @@
+on:
+  pull_request:
+    paths:
+      - "setup-node-environment/**"
+      - ".github/workflows/setup-node-environment-test.yaml"
+  push:
+    paths:
+      - "setup-node-environment/**"
+      - ".github/workflows/setup-node-environment-test.yaml"
+env:
+  TZ: Asia/Shanghai
+  package_json_content: |
+    {
+      "packageManager": "pnpm@10.6.5",
+      "dependencies": {
+        "bun": "^1.2.5"
+      }
+    }
+
+concurrency:
+  group: ${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  generate_lock:
+    runs-on: ubuntu-latest
+    outputs:
+      lock_file_content: ${{ steps.generate_lock.outputs.lock_file_content }}
+    steps:
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+          standalone: true
+      - id: generate_lock
+        env:
+          CI: 'false'
+        run: |
+          set -x;
+          cat <<EOF > package.json
+          ${{ env.package_json_content }}
+          EOF
+          pnpm config list
+          cat package.json
+          pnpm install --lockfile-only
+          echo "lock_file_content<<EOF" >> $GITHUB_OUTPUT
+          cat pnpm-lock.yaml >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+  tests:
+    needs: generate_lock
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        checkout:
+          - true
+          - false
+        container:
+          - 'yanhao98/runner-images:pnpm'
+          - '' # gitea/runner-images:ubuntu-latest
+        npmrc_content:
+          - ''
+          - ｜
+            use-node-version=22.14.0 # https://pnpm.io/zh/npmrc#use-node-version
+        lock_file:
+          - 'true'
+          - 'false'
+        cwd:
+          - ''
+          - 'test'
+    container: ${{ matrix.container }}
+    steps:
+      - uses: actions/checkout@main
+        if: matrix.checkout == 'true'
+      - name: 打印 matrix
+        run: |
+          echo "🤖---- 打印 matrix ----🤖"
+          echo "container: ${{ matrix.container }}"
+          echo "checkout: ${{ matrix.checkout }}"
+          echo "npmrc_content: ${{ matrix.npmrc_content }}"
+          echo "lock_file: ${{ matrix.lock_file }}"
+          echo "cwd: ${{ matrix.cwd }}"
+          echo "GITHUB_WORKSPACE: ${{ github.workspace }}"
+
+      - name: Create test directory
+        if: matrix.cwd != ''
+        run: |
+          mkdir -p ${{ matrix.cwd }}
+          pwd
+
+      - name: Create .npmrc
+        working-directory: ${{ matrix.cwd }}
+        if: matrix.npmrc_content != ''
+        run: |
+          set -x;
+          ls -l -R .
+          cat <<EOF > .npmrc
+          ${{ matrix.npmrc_content }}
+          EOF
+          pwd
+
+      - name: Create package.json
+        working-directory: ${{ matrix.cwd }}
+        run: |
+          mkdir -p ${{ github.workspace }}/.git
+          cat <<EOF > package.json
+          ${{ env.package_json_content }}
+          EOF
+          set -x;
+          ls -l -R .
+          cat package.json
+          pwd
+
+      - name: Create pnpm-lock.yaml
+        working-directory: ${{ matrix.cwd }}
+        if: matrix.lock_file == 'true'
+        run: |
+          mkdir -p ${{ github.workspace }}/.git
+          cat <<EOF > pnpm-lock.yaml
+          ${{ needs.generate_lock.outputs.lock_file_content }}
+          EOF
+          set -x;
+          ls -l -R .
+          cat pnpm-lock.yaml
+
+      - uses: yanhao98/composite-actions/setup-node-environment@main
+        with:
+          package_json_cwd: ${{ matrix.cwd }}
+          # pnpm_standalone: true

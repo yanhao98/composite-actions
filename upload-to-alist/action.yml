@@ -1,0 +1,87 @@
+name: '上传文件到 Alist'
+description: '将文件上传到 Alist 服务器'
+inputs:
+  alist_url:
+    description: 'Alist 服务器地址（不包含末尾的 /）'
+    required: true
+    default: 'https://alist.oo1.dev'
+  alist_username:
+    description: 'Alist 用户名'
+    required: true
+  alist_password:
+    description: 'Alist 密码'
+    required: true
+  alist_target:
+    description: 'Alist 目标路径（完整路径，如：/folder/subfolder/file.zip）'
+    required: true
+  file:
+    description: '要上传的文件路径（完整路径，如：./path/to/file.zip）'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: 检查文件
+      shell: bash
+      run: |
+        if [ ! -f "${{ inputs.file }}" ]; then
+          echo "错误: 文件 '${{ inputs.file }}' 不存在"
+          exit 1
+        fi
+        
+        # 获取文件大小
+        file_size=$(stat -f%z "${{ inputs.file }}" 2>/dev/null || stat -c%s "${{ inputs.file }}")
+        echo "文件大小: $file_size 字节"
+        
+        if [ "$file_size" -eq 0 ]; then
+          echo "错误: 文件为空"
+          exit 1
+        fi
+
+    - name: 获取 Alist Token
+      shell: bash
+      id: get_token
+      run: |
+        response=$(curl -s --location '${{ inputs.alist_url }}/api/auth/login' \
+          --header 'Content-Type: application/x-www-form-urlencoded' \
+          --data-urlencode "Username=${{ inputs.alist_username }}" \
+          --data-urlencode "Password=${{ inputs.alist_password }}")
+        
+        if ! echo "$response" | jq -e . >/dev/null 2>&1; then
+          echo "错误: 服务器返回的不是有效的 JSON 响应"
+          echo "响应内容: $response"
+          exit 1
+        fi
+        
+        token=$(echo "$response" | jq -r ".data.token")
+        
+        if [ "$token" = "null" ] || [ -z "$token" ]; then
+          echo "错误: 获取 token 失败"
+          echo "响应内容: $response"
+          exit 1
+        fi
+        
+        echo "成功获取 token"
+        echo "token=$token" >> $GITHUB_OUTPUT
+
+    - name: 上传文件到 Alist
+      shell: bash
+      run: |
+        response=$(curl -s --location --request PUT '${{ inputs.alist_url }}/api/fs/form' \
+          --header "Authorization: ${{ steps.get_token.outputs.token }}" \
+          --header "file-path: ${{ inputs.alist_target }}" \
+          --form "file=@${{ inputs.file }}")
+        
+        if ! echo "$response" | jq -e . >/dev/null 2>&1; then
+          echo "错误: 服务器返回的不是有效的 JSON 响应"
+          echo "响应内容: $response"
+          exit 1
+        fi
+        
+        if echo "$response" | jq -e '.code == 200' >/dev/null 2>&1; then
+          echo "✅ 文件上传成功"
+        else
+          echo "❌ 文件上传失败"
+          echo "错误响应: $response"
+          exit 1
+        fi
