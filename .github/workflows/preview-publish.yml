@@ -12,6 +12,11 @@ on:
 
 jobs:
   call-preview:
-    uses: Tencent/tdesign/.github/workflows/preview.yml@main
+    uses: https://github.com/Tencent/tdesign/.github/workflows/preview.yml@main
     secrets:
       TDESIGN_SURGE_TOKEN: ${{ secrets.TDESIGN_SURGE_TOKEN }}
+  another-job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Another job
+        run: echo "This is another job!"
