@@ -33,6 +33,7 @@ runs:
         pnpm --version
         pwd
         ls -al
+      working-directory: ${{ github.workspace }}
     # - name: 📦 Install Project Dependencies
     #   run: pnpm install --frozen-lockfile
     #   shell: bash
