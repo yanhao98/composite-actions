@@ -5,3 +5,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: yanhao98/composite-actions@main
+      - run: |
+          node --version
+          pnpm --version
