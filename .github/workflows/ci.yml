@@ -6,9 +6,11 @@ jobs:
   another-job:
     runs-on: ubuntu-latest
     steps:
-      - uses: yanhao98/composite-actions/setup-node-pnpm-install@b405146d7a0f29731128935fdfec0be07a9c7e99
+      - uses: yanhao98/composite-actions/setup-node-pnpm-install
       - name: Check Node and PNPM versions
         run: |
+          set -x
           node --version
           pnpm --version
           date
+          pwd
