@@ -1,0 +1,52 @@
+# 🔗 Links:
+# Source file: https://github.com/obytes/react-native-template-obytes/blob/master/.github/actions/setup-node-pnpm-install/action.yml
+# Composite actions docs: https://docs.github.com/en/actions/creating-actions/creating-a-composite-action
+
+# ✍️ Description:
+# This is a composite action, which means it can be used in other actions.
+# It is used in almost all workflows to set up the environment and install dependencies.
+# Updating  the package manager or Node version here will be reflected in all workflows.
+
+# 👀 Example usage:
+#       - name : 📦 Setup Node + PNPM + install deps
+#         uses: ./.github/actions/setup-node-pnpm-install
+
+name: "Setup  Node Environment"
+description: "Setup  Node + PNPM + Install Dependencies"
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@main
+      with:
+        # fetch-depth: 0 # zero stands for full checkout, which is required for semantic-release
+        filter: blob:none # we don't need all blobs, only the full tree
+        show-progress: false
+
+    - name: Prepare data
+      shell: bash
+      id: prepare
+      run: |
+        # Check package manager
+        packageManager=$(jq -r '.packageManager' package.json)
+        echo "packageManager: $packageManager"
+        if [[ "$packageManager" == "pnpm"* ]]; then
+          echo "pnpm detected: $packageManager"
+          echo "setup-pnpm=true" >> $GITHUB_OUTPUT
+        fi
+
+        # Check if pnpm-lock.yaml exists
+        if [[ -f "pnpm-lock.yaml" ]]; then
+          echo "pnpm-lock.yaml exists"
+          echo "pnpm-lock-exists=true" >> $GITHUB_OUTPUT
+        fi
+
+    - uses: pnpm/action-setup@v4 # https://github.com/pnpm/action-setup?tab=readme-ov-file#inputs
+      if: steps.prepare.outputs.setup-pnpm == 'true'
+    - uses: actions/setup-node@v4 # https://github.com/actions/setup-node?tab=readme-ov-file#usage
+      with:
+        node-version: lts/*
+        # cache: 'pnpm' # TODO: 判断是否有pnpm-lock.yaml文件，有则启用缓存
+    - name: 📦 Install Project Dependencies
+      if: steps.prepare.outputs.pnpm-lock-exists == 'true'
+      run: pnpm install --frozen-lockfile
+      shell: bash
