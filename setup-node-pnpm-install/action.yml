@@ -27,6 +27,7 @@ runs:
     - name: Check Node and PNPM versions
       shell: bash
       run: |
+        set -x
         node --version
         pnpm --version
         pwd
