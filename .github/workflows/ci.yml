@@ -30,4 +30,4 @@ jobs:
       - name: Check Docker image
         run: |
           set -x
-          docker images
+          docker run --rm image-test:latest whoami
