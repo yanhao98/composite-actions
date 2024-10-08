@@ -26,7 +26,8 @@ jobs:
           build_platforms: linux/amd64
           build_push: false
           build_load: true
-      # - name: Check Docker image
-      #   run: |
-      #     set -x
-      #     docker run --rm ghcr.io/yanhao98/composite-actions:latest pnpm --version
+          build_tags: image-test
+      - name: Check Docker image
+        run: |
+          set -x
+          docker images
