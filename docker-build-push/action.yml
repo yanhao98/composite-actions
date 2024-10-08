@@ -27,6 +27,10 @@ inputs:
     description: "是否推送 Docker 镜像"
     default: "true"
     required: false
+  build_load:
+    description: "是否加载 Docker 镜像"
+    default: "false"
+    required: false
 runs:
   using: "composite"
   steps:
@@ -51,7 +55,10 @@ runs:
         context: ${{ inputs.build_context }}
         platforms: ${{ inputs.build_platforms }}
         push: ${{ inputs.build_push }}
+        load: ${{ inputs.build_load }}
         # tags: ${{ steps.meta.outputs.tags }}
         # labels: ${{ steps.meta.outputs.labels }}
-        cache-from: type=local,src=/tmp/.buildx-cache
-        cache-to: type=local,dest=/tmp/.buildx-cache
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        # cache-from: type=local,src=/tmp/.buildx-cache
+        # cache-to: type=local,dest=/tmp/.buildx-cache
