@@ -22,6 +22,8 @@ jobs:
         with:
           login_username: ${{ secrets.DOCKERHUB_USERNAME }}
           login_password: ${{ secrets.DOCKERHUB_TOKEN }}
+          build_push: false
+          build_file: ./docker-build-push/Dockerfile
       # - name: Check Docker image
       #   run: |
       #     set -x

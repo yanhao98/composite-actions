@@ -4,13 +4,29 @@ inputs:
   login_repository:
     description: "docker/login-action 的 registry 参数"
     default: "docker.io"
-    required: true
+    required: false
   login_username:
     description: "docker/login-action 的 username 参数"
     required: true
   login_password:
     description: "docker/login-action 的 password 参数"
     required: true
+  build_file:
+    description: "Dockerfile 文件路径"
+    default: "./Dockerfile"
+    required: false
+  build_context:
+    description: "Docker 构建上下文路径"
+    default: "."
+    required: false
+  build_platforms:
+    description: "Docker 构建平台"
+    default: "linux/amd64,linux/arm64"
+    required: false
+  build_push:
+    description: "是否推送 Docker 镜像"
+    default: "true"
+    required: false
 runs:
   using: "composite"
   steps:
@@ -31,11 +47,11 @@ runs:
     - name: Build and push
       uses: docker/build-push-action@v6
       with:
-        context: .
-        platforms: linux/amd64,linux/arm64
-        push: true
-        tags: ${{ steps.meta.outputs.tags }}
-        labels: ${{ steps.meta.outputs.labels }}
-        file: ./Dockerfile
+        file: ${{ inputs.build_file }}
+        context: ${{ inputs.build_context }}
+        platforms: ${{ inputs.build_platforms }}
+        push: ${{ inputs.build_push }}
+        # tags: ${{ steps.meta.outputs.tags }}
+        # labels: ${{ steps.meta.outputs.labels }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache
