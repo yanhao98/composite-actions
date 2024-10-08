@@ -7,16 +7,19 @@ env:
   TZ: Asia/Shanghai
 
 jobs:
-  another-job:
+  setup-node-environment-test:
     runs-on: ubuntu-latest
     steps:
       - uses: yanhao98/composite-actions/setup-node-environment@main
       - name: Check Node and PNPM versions
         run: |
           set -x
-          node --version
-          pnpm --version
           which pnpm
-          date
-          pwd
-          ls -al
+  docker-build-push-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: yanhao98/composite-actions/docker-build-push@main
+      # - name: Check Docker image
+      #   run: |
+      #     set -x
+      #     docker run --rm ghcr.io/yanhao98/composite-actions:latest pnpm --version
