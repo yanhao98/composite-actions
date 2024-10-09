@@ -19,6 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: yanhao98/composite-actions/docker-build-push@main
+        id: docker-build-push
         with:
           login_username: ${{ secrets.DOCKERHUB_USERNAME }}
           login_password: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -26,7 +27,6 @@ jobs:
           build_platforms: linux/amd64
           build_push: false
           build_load: true
-          build_tags: image-test
           metadata_images: |
             docker.io/murielmay67761/docker-example
           metadata_tags: |
@@ -35,4 +35,5 @@ jobs:
         run: |
           set -x;
           # docker run --rm image-test:latest whoami
-          docker images;
+          # docker images;
+          docker run --rm ${{ steps.docker-build-push.outputs.imageid }} whoami
