@@ -31,8 +31,11 @@ inputs:
     description: "是否加载 Docker 镜像"
     default: "false"
     required: false
-  build_tags:
-    description: "Docker 镜像标签"
+  metadata_images:
+    description: "docker/metadata-action 的 images 参数"
+    required: false
+  metadata_tags:
+    description: "docker/metadata-action 的 tags 参数"
     required: false
 runs:
   using: "composite"
@@ -41,6 +44,12 @@ runs:
       with:
         filter: blob:none
         show-progress: false
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ inputs.metadata_images }}
+        tags: ${{ inputs.metadata_tags }}
     - name: Login to DockerHub
       uses: docker/login-action@v3
       with:
@@ -59,7 +68,7 @@ runs:
         platforms: ${{ inputs.build_platforms }}
         push: ${{ inputs.build_push }}
         load: ${{ inputs.build_load }}
-        tags: ${{ inputs.build_tags }}
+        tags: ${{ steps.meta.outputs.tags }}
         # labels: ${{ steps.meta.outputs.labels }}
         cache-from: type=gha
         cache-to: type=gha,mode=max

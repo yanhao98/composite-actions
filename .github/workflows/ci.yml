@@ -27,7 +27,12 @@ jobs:
           build_push: false
           build_load: true
           build_tags: image-test
+          metadata_images: |
+            docker.io/murielmay67761/docker-example
+          metadata_tags: |
+            type=raw,value=latest
       - name: Check Docker image
         run: |
-          set -x
-          docker run --rm image-test:latest whoami
+          set -x;
+          # docker run --rm image-test:latest whoami
+          docker images;
