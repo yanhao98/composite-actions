@@ -25,13 +25,13 @@ jobs:
         with:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      # - name: Login to GitHub Container Registry
-      #   if: steps.semantic.outputs.next_release_published == 'true'
-      #   uses: docker/login-action@v3
-      #   with:
-      #     registry: ghcr.io
-      #     username: ${{ github.repository_owner }}
-      #     password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Login to GitHub Container Registry
+        if: steps.semantic.outputs.next_release_published == 'true'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: yanhao98/composite-actions/docker-build-push@main
         if: steps.semantic.outputs.next_release_published == 'true'
@@ -43,7 +43,7 @@ jobs:
           build_load: false
           metadata_images: |
             docker.io/${{ vars.DOCKERHUB_USERNAME }}/docker-example
-            # ghcr.io/${{ github.repository }}
+            ghcr.io/${{ github.repository }}
           metadata_tags: |
             type=semver,pattern={{version}},value=${{ steps.semantic.outputs.next_release_version }}
             type=semver,pattern={{major}}.{{minor}},value=${{ steps.semantic.outputs.next_release_version }}
