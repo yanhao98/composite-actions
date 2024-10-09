@@ -30,10 +30,12 @@ jobs:
           metadata_images: |
             docker.io/murielmay67761/docker-example
           # metadata_tags: |
-          #   type=raw,value=latest
+          #     type=schedule,pattern=nightly,enable=true,priority=1000
+          #     type=ref,event=branch,enable=true,priority=600
+          #     type=ref,event=tag,enable=true,priority=600
+          #     type=ref,event=pr,prefix=pr-,enable=true,priority=600
       - name: Check Docker image
         run: |
           set -x;
-          # docker run --rm image-test:latest whoami
-          # docker images;
+          docker images;
           docker run --rm ${{ steps.docker-build-push.outputs.imageid }} whoami

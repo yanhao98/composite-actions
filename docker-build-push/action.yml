@@ -50,7 +50,7 @@ runs:
         show-progress: false
     - name: Extract metadata
       id: meta
-      uses: docker/metadata-action@v5
+      uses: docker/metadata-action@v5 # https://github.com/docker/metadata-action
       with:
         images: ${{ inputs.metadata_images }}
         tags: ${{ inputs.metadata_tags }}
