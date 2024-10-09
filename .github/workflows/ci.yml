@@ -29,8 +29,8 @@ jobs:
           build_load: true
           metadata_images: |
             docker.io/murielmay67761/docker-example
-          metadata_tags: |
-            type=raw,value=latest
+          # metadata_tags: |
+          #   type=raw,value=latest
       - name: Check Docker image
         run: |
           set -x;
