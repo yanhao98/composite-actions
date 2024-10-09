@@ -29,6 +29,7 @@ jobs:
           build_load: true
           metadata_images: |
             docker.io/murielmay67761/docker-example
+            ghcr.io/${{ github.repository }}
           # metadata_tags: |
           #     type=schedule,pattern=nightly,enable=true,priority=1000
           #     type=ref,event=branch,enable=true,priority=600
