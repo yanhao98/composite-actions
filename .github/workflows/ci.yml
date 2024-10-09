@@ -40,7 +40,7 @@ jobs:
           build_push: false
           build_load: true
           metadata_images: |
-            docker.io/murielmay67761/docker-example
+            docker.io/${{ vars.DOCKERHUB_USERNAME }}/docker-example
             ghcr.io/${{ github.repository }}
           # metadata_tags: |
           #     type=schedule,pattern=nightly,enable=true,priority=1000
@@ -50,5 +50,6 @@ jobs:
       - name: Check Docker image
         run: |
           set -x;
+          echo ${{ github.repository }};
           docker images;
-          docker run --rm ${{ steps.docker-build-push.outputs.imageid }} whoami
+          docker run --rm ${{ steps.docker-build-push.outputs.imageid }} whoami;
