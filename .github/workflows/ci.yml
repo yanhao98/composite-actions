@@ -37,16 +37,16 @@ jobs:
         with:
           build_file: ./docker-build-push/Dockerfile
           build_platforms: linux/amd64
-          build_push: false
+          build_push: ${{ github.ref == 'refs/heads/main' }}
           build_load: true
           metadata_images: |
             docker.io/${{ vars.DOCKERHUB_USERNAME }}/docker-example
             ghcr.io/${{ github.repository }}
-          # metadata_tags: |
-          #     type=schedule,pattern=nightly,enable=true,priority=1000
-          #     type=ref,event=branch,enable=true,priority=600
-          #     type=ref,event=tag,enable=true,priority=600
-          #     type=ref,event=pr,prefix=pr-,enable=true,priority=600
+          metadata_tags: |
+              type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+              type=ref,event=tag,enable=true,priority=600
+              type=semver,pattern={{version}}
+              type=semver,pattern={{major}}
       - name: Check Docker image
         run: |
           set -x;
