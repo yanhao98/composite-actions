@@ -37,7 +37,7 @@ jobs:
         with:
           build_file: ./docker-build-push/Dockerfile
           build_platforms: linux/amd64
-          build_push: ${{ github.ref == 'refs/heads/main' }}
+          build_push: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/tags/*' }}
           build_load: true
           metadata_images: |
             docker.io/${{ vars.DOCKERHUB_USERNAME }}/docker-example
