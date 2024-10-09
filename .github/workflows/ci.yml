@@ -37,13 +37,12 @@ jobs:
         with:
           build_file: ./docker-build-push/Dockerfile
           build_platforms: linux/amd64
-          build_push: ${{ github.ref == 'refs/heads/main' }}
+          build_push: ${{ github.ref_type == 'tag' }}
           build_load: true
           metadata_images: |
             docker.io/${{ vars.DOCKERHUB_USERNAME }}/docker-example
             ghcr.io/${{ github.repository }}
           metadata_tags: |
-              type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
               type=semver,pattern={{version}}
               type=semver,pattern={{major}}.{{minor}}
               type=semver,pattern={{major}}
