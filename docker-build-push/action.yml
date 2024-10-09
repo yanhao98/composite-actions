@@ -33,7 +33,19 @@ outputs:
 runs:
   using: "composite"
   steps:
+    - name: Check .git folder
+      id: check-git-folder
+      shell: bash
+      run: |
+        if [ -d .git ]; then
+          echo "Found .git folder"
+          echo "git-folder-exists=true" >> $GITHUB_OUTPUT
+        else
+          echo "No .git folder found"
+          echo "git-folder-exists=false" >> $GITHUB_OUTPUT
+        fi
     - uses: actions/checkout@main
+      if: steps.check-git-folder.outputs.git-folder-exists == 'false'
       with:
         filter: blob:none
         show-progress: false
