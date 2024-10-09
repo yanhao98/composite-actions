@@ -50,6 +50,5 @@ jobs:
       - name: Check Docker image
         run: |
           set -x;
-          echo ${{ github.repository }};
           docker images;
           docker run --rm ${{ steps.docker-build-push.outputs.imageid }} whoami;

@@ -42,8 +42,12 @@ runs:
       id: meta
       uses: docker/metadata-action@v5 # https://github.com/docker/metadata-action
       with:
+        context: 'git'
+        # flavor
         images: ${{ inputs.metadata_images }}
         tags: ${{ inputs.metadata_tags }}
+        sep-tags: '\n'
+        sep-labels: '\n'
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v3
     - name: Set up Docker Buildx
