@@ -7,6 +7,7 @@ on:
     # paths:
     #   - 'docker-build-push/**'
     #   - '.github/workflows/docker-build-push.yml'
+  pull_request:
 
 env:
   TZ: Asia/Shanghai
