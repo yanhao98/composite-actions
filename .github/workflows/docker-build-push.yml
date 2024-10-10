@@ -15,6 +15,12 @@ jobs:
   docker-build-push-test:
     runs-on: ubuntu-latest
     steps:
+      - run: |
+          echo "Hello, world!"
+          echo "Current time: $(date)"
+          echo ${{ secrets.DOCKERHUB_TOKEN }} | wc -c
+          echo ${{ secrets.GITHUB_TOKEN }} | wc -c
+          echo ${{ vars.DOCKERHUB_USERNAME }} | wc -c
       - uses: actions/checkout@main
       - uses: yanhao98/semantic-release-action@main
         id: semantic
@@ -53,3 +59,4 @@ jobs:
       #     set -x;
       #     docker images;
       #     docker run --rm ${{ steps.docker-build-push.outputs.imageid }} whoami;
+# 
