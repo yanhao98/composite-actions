@@ -2,12 +2,11 @@ name: docker-build-push
 
 on:
   push:
-    # branches:
-    #   - main
-    # paths:
-    #   - 'docker-build-push/**'
-    #   - '.github/workflows/docker-build-push.yml'
-  pull_request:
+    branches:
+      - main
+    paths:
+      - 'docker-build-push/**'
+      - '.github/workflows/docker-build-push.yml'
 
 env:
   TZ: Asia/Shanghai
