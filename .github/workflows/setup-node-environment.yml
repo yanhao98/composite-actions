@@ -42,7 +42,7 @@ jobs:
           set -x;
           # sed -i '/use-node-version/d' .npmrc
           node -v;
-          # cat .npmrc;
+          cat .npmrc;
 
       - uses: yanhao98/composite-actions/setup-node-environment@main
 
