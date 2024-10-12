@@ -71,7 +71,14 @@ runs:
         nodeVersion=$(sed -n 's/.*use-node-version=\([0-9.]*\).*/\1/p' .npmrc)
         if [[ -z "$nodeVersion" ]]; then
           nodeVersion="lts/*"
+          echo "##########################################################"
+          echo "Node version not found in .npmrc. Using default: $nodeVersion"
+        else
+          echo "##########################################################"
+          echo "Node version found in .npmrc: $nodeVersion"
         fi
+
+        echo "node-version=$nodeVersion" >> $GITHUB_OUTPUT
 
     - uses: pnpm/action-setup@v4 # https://github.com/pnpm/action-setup?tab=readme-ov-file#inputs
       if: steps.prepare.outputs.setup-pnpm == 'true'
