@@ -40,12 +40,12 @@ runs:
       run: |
         # Check package manager
         packageManager=$(node -p "require('./package.json').packageManager")
-        echo "##########################################################"
+        echo "#############################"
         echo "packageManager: $packageManager found in package.json"
         echo ""
 
         if [[ "$packageManager" == "pnpm"* ]]; then
-          echo "##########################################################"
+          echo "#############################"
           # TODO: 还有一种情况就是镜像中已经安装了pnpm。
           echo "setup-pnpm=true"
           echo ""
@@ -55,7 +55,7 @@ runs:
 
         # Check if pnpm-lock.yaml exists
         if [[ -f "pnpm-lock.yaml" ]]; then
-          echo "##########################################################"
+          echo "#############################"
           echo "pnpm-lock.yaml exists. So pnpm install --frozen-lockfile will run"
           echo ""
 
@@ -70,11 +70,11 @@ runs:
         nodeVersion=$(sed -n 's/.*use-node-version=\([0-9.]*\).*/\1/p' .npmrc)
         if [[ -z "$nodeVersion" ]]; then
           nodeVersion="lts/*"
-          echo "##########################################################"
+          echo "#############################"
           echo "Node version not found in .npmrc. Using default: $nodeVersion"
           echo ""
         else
-          echo "##########################################################"
+          echo "#############################"
           echo "Node version found in .npmrc: $nodeVersion"
           echo ""
         fi
