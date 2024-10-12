@@ -15,7 +15,7 @@ jobs:
       - name: before
         run: |
           set -x
-          which pnpm
+          which pnpm || true
           node -v
 
       - uses: yanhao98/composite-actions/setup-node-environment@main
