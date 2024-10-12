@@ -1,4 +1,8 @@
 on:
+  pull_request:
+    paths:
+      - "docker-build-push/**"
+      - ".github/workflows/docker-build-push.yml"
   push:
     paths:
       - "docker-build-push/**"

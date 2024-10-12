@@ -1,4 +1,8 @@
 on:
+  pull_request:
+    paths:
+      - "setup-node-environment/**"
+      - ".github/workflows/setup-node-environment.yml"
   push:
     paths:
       - "setup-node-environment/**"
