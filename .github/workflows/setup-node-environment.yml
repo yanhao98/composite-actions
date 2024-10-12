@@ -16,8 +16,7 @@ jobs:
       fail-fast: false
       matrix:
         container-image: ["", "yanhao98/runner-images:pnpm"]
-        os: [ubuntu-latest, macos-15] # https://docs.github.com/zh/actions/using-github-hosted-runners/using-github-hosted-runners/about-github-hosted-runners#用于公共存储库的-github-托管的标准运行器
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     container:
       image: ${{ matrix.container-image }}
     steps:

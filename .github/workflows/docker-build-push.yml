@@ -12,7 +12,11 @@ env:
 
 jobs:
   job:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-15] # https://docs.github.com/zh/actions/using-github-hosted-runners/using-github-hosted-runners/about-github-hosted-runners#用于公共存储库的-github-托管的标准运行器
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@main
       - uses: yanhao98/semantic-release-action@main
@@ -38,7 +42,7 @@ jobs:
         with:
           build_file: ./Dockerfile.test
           build_platforms: linux/amd64,linux/arm64
-          build_push: true
+          build_push: ${{ matrix.os == 'ubuntu-latest' }}
           build_load: false
           metadata_images: |
             docker.io/${{ vars.DOCKERHUB_USERNAME }}/docker-example
