@@ -20,15 +20,34 @@ jobs:
     steps:
       - name: before
         run: |
-          set -x
-          which pnpm || true
-          node -v
+          set -x;
+          which pnpm || true;
+          node -v;
 
       - uses: yanhao98/composite-actions/setup-node-environment@main
 
       - name: Check Node and PNPM versions
         run: |
-          set -x
-          which pnpm
-          node -v
-          pnpm node -v
+          set -x;
+          which pnpm;
+          node -v;
+          pnpm node -v;
+
+  job-2:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@main
+      - name: before
+        run: |
+          set -x;
+          sed -i '/use-node-version/d' .npmrc
+          node -v;
+
+      - uses: yanhao98/composite-actions/setup-node-environment@main
+
+      - name: Check Node and PNPM versions
+        run: |
+          set -x;
+          which pnpm;
+          node -v;
+          pnpm node -v;
