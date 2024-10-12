@@ -68,7 +68,9 @@ runs:
 
         # Extract the node version from the .npmrc file
         set -x;
-        nodeVersion=$(grep 'use-node-version=' .npmrc | sed -E 's/^use-node-version=([0-9.]+).*/\1/')
+        if [ -f ".npmrc" ]; then
+          nodeVersion=$(grep 'use-node-version=' .npmrc | sed -E 's/^use-node-version=([0-9.]+).*/\1/')
+        fi
         if [ -z "$nodeVersion" ]; then
           nodeVersion="lts/*"
         fi
