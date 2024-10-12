@@ -37,12 +37,12 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: yanhao98/composite-actions/docker-build-push@main
-        if: steps.semantic.outputs.next_release_published == 'true'
+        # if: steps.semantic.outputs.next_release_published == 'true'
         id: docker-build-push
         with:
           build_file: ./Dockerfile.test
           build_platforms: linux/amd64,linux/arm64
-          build_push: true
+          build_push: ${{ matrix.os == 'ubuntu-latest' && steps.semantic.outputs.next_release_published == 'true' }}
           build_load: false
           metadata_images: |
             docker.io/${{ vars.DOCKERHUB_USERNAME }}/docker-example
