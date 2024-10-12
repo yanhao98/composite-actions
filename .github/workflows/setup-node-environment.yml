@@ -40,8 +40,9 @@ jobs:
       - name: before
         run: |
           set -x;
-          sed -i '/use-node-version/d' .npmrc
+          # sed -i '/use-node-version/d' .npmrc
           node -v;
+          # cat .npmrc;
 
       - uses: yanhao98/composite-actions/setup-node-environment@main
 
