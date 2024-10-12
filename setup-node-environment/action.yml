@@ -73,9 +73,11 @@ runs:
           nodeVersion="lts/*"
           echo "##########################################################"
           echo "Node version not found in .npmrc. Using default: $nodeVersion"
+          echo ""
         else
           echo "##########################################################"
           echo "Node version found in .npmrc: $nodeVersion"
+          echo ""
         fi
 
         echo "node-version=$nodeVersion" >> $GITHUB_OUTPUT
