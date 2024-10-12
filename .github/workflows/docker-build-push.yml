@@ -12,11 +12,11 @@ env:
 
 jobs:
   job:
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, macos-latest] # https://docs.github.com/zh/actions/using-github-hosted-runners/using-github-hosted-runners/about-github-hosted-runners#用于公共存储库的-github-托管的标准运行器
-    runs-on: ${{ matrix.os }}
+    # strategy:
+    #   fail-fast: false
+    #   matrix:
+    #     os: [ubuntu-latest, macos-latest] # https://docs.github.com/zh/actions/using-github-hosted-runners/using-github-hosted-runners/about-github-hosted-runners#用于公共存储库的-github-托管的标准运行器
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@main
       - uses: yanhao98/semantic-release-action@main
@@ -37,12 +37,12 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: yanhao98/composite-actions/docker-build-push@main
-        # if: steps.semantic.outputs.next_release_published == 'true'
+        if: steps.semantic.outputs.next_release_published == 'true'
         id: docker-build-push
         with:
           build_file: ./Dockerfile.test
           build_platforms: linux/amd64,linux/arm64
-          build_push: ${{ matrix.os == 'ubuntu-latest' && steps.semantic.outputs.next_release_published == 'true' }}
+          build_push: true
           build_load: false
           metadata_images: |
             docker.io/${{ vars.DOCKERHUB_USERNAME }}/docker-example
