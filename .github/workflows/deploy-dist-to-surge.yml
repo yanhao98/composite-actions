@@ -15,10 +15,10 @@ jobs:
       - name: 准备部署文件
         run: |
           mkdir dist
-          echo "<h1>Hello, World!</h1>" > dist/index.html
+          html="<!DOCTYPE html><html><body><h1>${{ github.event_name }}: ${{ github.sha }}</h1></body></html>"
+          echo $html > dist/index.html
       - uses: yanhao98/composite-actions/deploy-dist-to-surge@main
         id: surge_deploy
       - name: Check Surge URL
         run: |
-          set -x
-          echo ${{ steps.surge_deploy.outputs.url }}
+          echo "steps.surge_deploy.outputs.url: ${{ steps.surge_deploy.outputs.url }}"
