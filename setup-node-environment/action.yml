@@ -39,7 +39,8 @@ runs:
       id: prepare
       run: |
         # Check package manager
-        packageManager=$(jq -r '.packageManager' package.json)
+        # packageManager=$(jq -r '.packageManager' package.json)
+        packageManager=$(node -p "require('./package.json').packageManager")
         echo "packageManager: $packageManager"
         if [[ "$packageManager" == "pnpm"* ]]; then
           echo "setup-pnpm=true"
