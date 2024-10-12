@@ -40,6 +40,7 @@ jobs:
       - name: before
         run: |
           set -x;
+          cat .npmrc;
           sed -i '/use-node-version/d' .npmrc
           node -v;
           cat .npmrc;
