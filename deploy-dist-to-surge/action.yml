@@ -1,5 +1,5 @@
 name: "Deploy dist to Surge"
-description: ""
+description: "部署 dist 到 Surge"
 outputs:
   url:
     description: "Preview URL"
