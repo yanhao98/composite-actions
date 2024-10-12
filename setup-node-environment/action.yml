@@ -46,6 +46,7 @@ runs:
 
         if [[ "$packageManager" == "pnpm"* ]]; then
           echo "##########################################################"
+          # TODO: 还有一种情况就是镜像中已经安装了pnpm。
           echo "setup-pnpm=true"
           echo ""
 
@@ -64,7 +65,9 @@ runs:
           echo "pnpm-lock.yaml does not exist"
         fi
 
+
         # Extract the node version from the .npmrc file
+        set -x;
         nodeVersion=$(grep 'use-node-version=' .npmrc | sed -E 's/^use-node-version=([0-9.]+).*/\1/')
         echo "node-version=$nodeVersion" >> $GITHUB_OUTPUT
         sed -i '/use-node-version/d' .npmrc
