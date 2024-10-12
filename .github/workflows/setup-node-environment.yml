@@ -43,11 +43,6 @@ jobs:
           sed -i '/use-node-version/d' .npmrc
           node -v;
 
-          set -x;
-          nodeVersion=$(grep 'use-node-version=' .npmrc | sed -E 's/^use-node-version=([0-9.]+).*/\1/')
-          echo "node-version=$nodeVersion" >> $GITHUB_OUTPUT
-          sed -i '/use-node-version/d' .npmrc
-
       - uses: yanhao98/composite-actions/setup-node-environment@main
 
       - name: Check Node and PNPM versions
