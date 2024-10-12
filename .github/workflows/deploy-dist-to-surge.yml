@@ -1,7 +1,5 @@
 on:
   push:
-    branches:
-      - main
     paths:
       - "deploy-dist-to-surge.yml/**"
       - ".github/workflows/deploy-dist-to-surge.yml"

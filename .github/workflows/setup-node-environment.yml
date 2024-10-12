@@ -1,7 +1,5 @@
 on:
   push:
-    branches:
-      - main
     paths:
       - "setup-node-environment/**"
       - ".github/workflows/setup-node-environment.yml"
@@ -33,7 +31,7 @@ jobs:
           node -v;
           pnpm node -v;
 
-  job-2:
+  job-2: # 测试 .npmrc 文件没有 use-node-version 字段
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@main
@@ -44,7 +42,6 @@ jobs:
           sed -i '/use-node-version/d' .npmrc
           node -v;
           cat .npmrc;
-
 
       - uses: yanhao98/composite-actions/setup-node-environment@main
 
