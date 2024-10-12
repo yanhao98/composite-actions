@@ -45,7 +45,7 @@ runs:
         echo "packageManager: $packageManager found in package.json"
         if [[ "$packageManager" == "pnpm"* ]] && ! which pnpm > /dev/null; then
           echo "the package manager is pnpm but pnpm is not installed"
-          setup-pnpm=true
+          setupPnpm=true
         fi
         echo "setupPnpm: $setupPnpm"
         echo "setup-pnpm=$setupPnpm" >> $GITHUB_OUTPUT
