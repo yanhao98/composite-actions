@@ -38,7 +38,7 @@ runs:
       shell: bash
       id: prepare
       run: |
-        # Check package manager
+        # 判断是否需要 pnpm/action-setup
         echo "#############################"
         setupPnpm=false
         packageManager=$(node -p "require('./package.json').packageManager")
@@ -46,24 +46,26 @@ runs:
         if [[ "$packageManager" == "pnpm"* ]] && ! which pnpm > /dev/null; then
           echo "the package manager is pnpm but pnpm is not installed"
           setupPnpm=true
+        else
+          echo "the package manager is not pnpm or pnpm is already installed"
         fi
         echo "setupPnpm: $setupPnpm"
         echo "setup-pnpm=$setupPnpm" >> $GITHUB_OUTPUT
         echo ""
 
-        # Check if pnpm-lock.yaml exists
+        # 判断是否需要运行 pnpm install
         echo "#############################"
         if [[ -f "pnpm-lock.yaml" ]]; then
           echo "pnpm-lock.yaml exists. So pnpm install --frozen-lockfile will run"
           echo "pnpm-lock-exists=true" >> $GITHUB_OUTPUT
           echo "cache=pnpm" >> $GITHUB_OUTPUT
         else
-          echo "pnpm-lock.yaml does not exist"
+          echo "pnpm-lock.yaml does not exist. So pnpm install will not run"
         fi
         echo ""
 
 
-        # Extract the node version from the .npmrc file
+        # 设置 node 版本
         echo "#############################"
         nodeVersion=$(sed -n 's/.*use-node-version=\([0-9.]*\).*/\1/p' .npmrc)
         if [[ -z "$nodeVersion" ]]; then
