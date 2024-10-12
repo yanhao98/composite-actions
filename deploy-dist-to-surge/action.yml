@@ -1,0 +1,22 @@
+name: "Deploy dist to Surge"
+description: ""
+outputs:
+  url:
+    description: "Preview URL"
+    value: ${{ steps.surge_deploy.outputs.url }}
+runs:
+  using: "composite"
+  steps:
+    - name: 部署到 Surge
+      shell: bash
+      id: surge_deploy
+      # https://github.com/afc163/surge-preview
+      # https://github.com/Tencent/tdesign-vue-next/pull/1604#issuecomment-1236244550
+      # https://github.com/Tencent/tdesign-vue-next/blob/03036a19adccf4657d7792e3a61a6c6a7d902e3e/.github/workflows/preview-publish.yml
+      # https://github.com/Tencent/tdesign/blob/0c0c9b63897c05d10c58e1a1e36feda2cb99eca7/.github/workflows/preview.yml#L40
+      run: |
+        export DEPLOY_DOMAIN=https://${{ github.sha }}.surge.sh
+        cp dist/index.html dist/200.html
+        npx surge --project ./dist --domain $DEPLOY_DOMAIN --token d843de16b331c626f10771245c56ed93 # npx surge token
+        echo the preview URL is $DEPLOY_DOMAIN
+        echo "url=$DEPLOY_DOMAIN" >> $GITHUB_OUTPUT

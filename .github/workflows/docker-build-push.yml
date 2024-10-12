@@ -1,18 +1,15 @@
-name: docker-build-push
-
 on:
   push:
     branches:
       - main
     paths:
-      - 'docker-build-push/**'
-      - '.github/workflows/docker-build-push.yml'
-
+      - "docker-build-push/**"
+      - ".github/workflows/docker-build-push.yml"
 env:
   TZ: Asia/Shanghai
 
 jobs:
-  docker-build-push-test:
+  job:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@main
@@ -37,7 +34,7 @@ jobs:
         if: steps.semantic.outputs.next_release_published == 'true'
         id: docker-build-push
         with:
-          build_file: ./docker-build-push/Dockerfile
+          build_file: ./Dockerfile.test
           build_platforms: linux/amd64,linux/arm64
           build_push: true
           build_load: false
