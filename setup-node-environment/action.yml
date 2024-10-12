@@ -67,15 +67,10 @@ runs:
 
 
         # Extract the node version from the .npmrc file
-        set -x;
-        if [ -f ".npmrc" ]; then
-          nodeVersion=$(grep 'use-node-version=' .npmrc | sed -E 's/^use-node-version=([0-9.]+).*/\1/')
-        fi
-        if [ -z "$nodeVersion" ]; then
+        nodeVersion=$(sed -n 's/.*use-node-version=\([0-9.]*\).*/\1/p' .npmrc)
+        if [[ -z "$nodeVersion" ]]; then
           nodeVersion="lts/*"
         fi
-        echo "node-version=$nodeVersion" >> $GITHUB_OUTPUT
-        sed -i '/use-node-version/d' .npmrc
 
     - uses: pnpm/action-setup@v4 # https://github.com/pnpm/action-setup?tab=readme-ov-file#inputs
       if: steps.prepare.outputs.setup-pnpm == 'true'
