@@ -11,6 +11,12 @@ env:
 jobs:
   job:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        container-image: ["", "yanhao98/runner-images:pnpm"]
+    container:
+      image: ${{ matrix.container-image }}
     steps:
       - name: before
         run: |
