@@ -42,7 +42,7 @@ jobs:
         with:
           build_file: ./Dockerfile.test
           build_platforms: linux/amd64,linux/arm64
-          build_push: ${{ matrix.os == 'ubuntu-latest' }}
+          build_push: true
           build_load: false
           metadata_images: |
             docker.io/${{ vars.DOCKERHUB_USERNAME }}/docker-example
