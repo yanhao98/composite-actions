@@ -16,7 +16,7 @@ jobs:
         run: |
           mkdir dist
           echo "<h1>Hello, World!</h1>" > dist/index.html
-      - uses: yanhao98/composite-actions/deploy-dist-to-surge.yml@main
+      - uses: yanhao98/composite-actions/deploy-dist-to-surge@main
         id: surge_deploy
       - name: Check Surge URL
         run: |
