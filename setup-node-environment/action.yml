@@ -39,28 +39,41 @@ runs:
       id: prepare
       run: |
         # Check package manager
-        # packageManager=$(jq -r '.packageManager' package.json)
         packageManager=$(node -p "require('./package.json').packageManager")
-        echo "packageManager: $packageManager"
+        echo "#############################"
+        echo "packageManager: $packageManager found in package.json"
+        echo "#############################"
+
         if [[ "$packageManager" == "pnpm"* ]]; then
+          echo "#############################"
           echo "setup-pnpm=true"
+          echo "#############################"
+
           echo "setup-pnpm=true" >> $GITHUB_OUTPUT
         fi
 
         # Check if pnpm-lock.yaml exists
         if [[ -f "pnpm-lock.yaml" ]]; then
-          echo "pnpm-lock.yaml exists"
+          echo "#############################"
+          echo "pnpm-lock.yaml exists. So pnpm install --frozen-lockfile will run"
+          echo "#############################"
+
           echo "pnpm-lock-exists=true" >> $GITHUB_OUTPUT
           echo "cache=pnpm" >> $GITHUB_OUTPUT
         else
           echo "pnpm-lock.yaml does not exist"
         fi
 
+        # Extract the node version from the .npmrc file
+        nodeVersion=$(grep 'use-node-version=' .npmrc | sed -E 's/^use-node-version=([0-9.]+).*/\1/')
+        echo "node-version=$nodeVersion" >> $GITHUB_OUTPUT
+        sed -i '/use-node-version/d' .npmrc
+
     - uses: pnpm/action-setup@v4 # https://github.com/pnpm/action-setup?tab=readme-ov-file#inputs
       if: steps.prepare.outputs.setup-pnpm == 'true'
     - uses: actions/setup-node@v4 # https://github.com/actions/setup-node?tab=readme-ov-file#usage
       with:
-        node-version: lts/*
+        node-version: ${{ steps.prepare.outputs.node-version || 'lts/*' }}
         cache: ${{ steps.prepare.outputs.cache }}
     - name: 📦 Install Project Dependencies
       if: steps.prepare.outputs.pnpm-lock-exists == 'true'
