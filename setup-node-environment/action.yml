@@ -40,23 +40,23 @@ runs:
       run: |
         # Check package manager
         packageManager=$(node -p "require('./package.json').packageManager")
-        echo "#############################"
+        echo "##########################################################"
         echo "packageManager: $packageManager found in package.json"
-        echo "#############################"
+        echo ""
 
         if [[ "$packageManager" == "pnpm"* ]]; then
-          echo "#############################"
+          echo "##########################################################"
           echo "setup-pnpm=true"
-          echo "#############################"
+          echo ""
 
           echo "setup-pnpm=true" >> $GITHUB_OUTPUT
         fi
 
         # Check if pnpm-lock.yaml exists
         if [[ -f "pnpm-lock.yaml" ]]; then
-          echo "#############################"
+          echo "##########################################################"
           echo "pnpm-lock.yaml exists. So pnpm install --frozen-lockfile will run"
-          echo "#############################"
+          echo ""
 
           echo "pnpm-lock-exists=true" >> $GITHUB_OUTPUT
           echo "cache=pnpm" >> $GITHUB_OUTPUT
