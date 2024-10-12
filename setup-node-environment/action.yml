@@ -39,47 +39,41 @@ runs:
       id: prepare
       run: |
         # Check package manager
-        packageManager=$(node -p "require('./package.json').packageManager")
         echo "#############################"
+        setupPnpm=false
+        packageManager=$(node -p "require('./package.json').packageManager")
         echo "packageManager: $packageManager found in package.json"
+        if [[ "$packageManager" == "pnpm"* ]] && ! which pnpm > /dev/null; then
+          echo "the package manager is pnpm but pnpm is not installed"
+          setup-pnpm=true
+        fi
+        echo "setupPnpm: $setupPnpm"
+        echo "setup-pnpm=$setupPnpm" >> $GITHUB_OUTPUT
         echo ""
 
-        if [[ "$packageManager" == "pnpm"* ]]; then
-          echo "#############################"
-          # TODO: 还有一种情况就是镜像中已经安装了pnpm。
-          echo "setup-pnpm=true"
-          echo ""
-
-          echo "setup-pnpm=true" >> $GITHUB_OUTPUT
-        fi
-
         # Check if pnpm-lock.yaml exists
+        echo "#############################"
         if [[ -f "pnpm-lock.yaml" ]]; then
-          echo "#############################"
           echo "pnpm-lock.yaml exists. So pnpm install --frozen-lockfile will run"
-          echo ""
-
           echo "pnpm-lock-exists=true" >> $GITHUB_OUTPUT
           echo "cache=pnpm" >> $GITHUB_OUTPUT
         else
           echo "pnpm-lock.yaml does not exist"
         fi
+        echo ""
 
 
         # Extract the node version from the .npmrc file
+        echo "#############################"
         nodeVersion=$(sed -n 's/.*use-node-version=\([0-9.]*\).*/\1/p' .npmrc)
         if [[ -z "$nodeVersion" ]]; then
           nodeVersion="lts/*"
-          echo "#############################"
           echo "Node version not found in .npmrc. Using default: $nodeVersion"
-          echo ""
         else
-          echo "#############################"
           echo "Node version found in .npmrc: $nodeVersion"
-          echo ""
         fi
-
         echo "node-version=$nodeVersion" >> $GITHUB_OUTPUT
+        echo ""
 
     - uses: pnpm/action-setup@v4 # https://github.com/pnpm/action-setup?tab=readme-ov-file#inputs
       if: steps.prepare.outputs.setup-pnpm == 'true'
