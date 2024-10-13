@@ -84,6 +84,7 @@ runs:
         node-version: ${{ steps.prepare.outputs.node-version }}
         cache: ${{ steps.prepare.outputs.cache }}
     - run: cat .npmrc
+      shell: bash
     - name: 📦 Install Project Dependencies
       if: steps.prepare.outputs.pnpm-lock-exists == 'true'
       run: pnpm install --frozen-lockfile
