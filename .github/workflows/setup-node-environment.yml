@@ -35,7 +35,11 @@ jobs:
           node -v;
           pnpm node -v;
 
-  job-2: # 测试 .npmrc 文件没有 use-node-version 字段
+  _npmrc_no_use_node_version:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@main
@@ -56,9 +60,13 @@ jobs:
           node -v;
           pnpm node -v;
 
-  job-3:
+  actions_setup_node_v4:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18, 20, 22, lts/*]
     steps:
-      - uses: actions/setup-node@v4
+      - name: "node-version: ${{ matrix.node-version }}"
+        uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: ${{ matrix.node-version }}
