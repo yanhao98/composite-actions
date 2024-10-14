@@ -4,5 +4,8 @@
     "https://git.1-h.cc/examples/renovate-example/raw/branch/main/default.json5",
     ":automergeAll"
   ],
-  "dependencyDashboard": false
+  "dependencyDashboard": false,
+  "packageRules": [
+    { "minimumReleaseAge": "1 days", "matchPackageNames": [ "*" ] }
+  ]
 }
