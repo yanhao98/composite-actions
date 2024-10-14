@@ -72,4 +72,3 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - run: ls -lha /opt/hostedtoolcache
       - run: ls -lha /opt/hostedtoolcache/node/
-      - run: tree /opt/hostedtoolcache
