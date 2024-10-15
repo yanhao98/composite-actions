@@ -33,10 +33,6 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - name: 测试在这里取 vars
-      shell: bash
-      run: |
-        echo "vars.DOCKERHUB_USERNAME: ${{ vars.DOCKERHUB_USERNAME }}"
     - name: Check .git folder
       id: check-git-folder
       shell: bash
