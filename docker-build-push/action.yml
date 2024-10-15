@@ -33,14 +33,10 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - name: 测试在这里取 secrets
+    - name: 测试在这里取 vars
       shell: bash
       run: |
-        if [ "${{ secrets.VALUE_IS_HY }}" == "HY" ]; then
-            echo "Got secrets VALUE_IS_HY"
-        else
-            echo "No secrets VALUE_IS_HY"
-        fi
+        echo "vars.DOCKERHUB_USERNAME: ${{ vars.DOCKERHUB_USERNAME }}"
     - name: Check .git folder
       id: check-git-folder
       shell: bash
