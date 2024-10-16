@@ -35,12 +35,12 @@ jobs:
           node -v;
           pnpm node -v;
 
-  _npmrc_no_use_node_version:
+  npmrc_no_use_node_version:
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@main
       - name: before
@@ -50,6 +50,24 @@ jobs:
           sed -i '/use-node-version/d' .npmrc
           node -v;
           cat .npmrc;
+
+      - uses: yanhao98/composite-actions/setup-node-environment@main
+
+      - name: Check Node and PNPM versions
+        run: |
+          set -x;
+          which pnpm;
+          node -v;
+          pnpm node -v;
+
+  no_npmrc:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@main
+      - name: before
+        run: |
+          set -x;
+          rm -f .npmrc
 
       - uses: yanhao98/composite-actions/setup-node-environment@main
 
