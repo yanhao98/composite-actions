@@ -19,6 +19,7 @@ inputs:
     required: false
   push:
     description: "是否推送 Docker 镜像"
+    default: "false"
     required: false
   load:
     description: "是否加载 Docker 镜像"
