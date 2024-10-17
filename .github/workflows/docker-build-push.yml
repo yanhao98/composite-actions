@@ -11,21 +11,15 @@ env:
   TZ: Asia/Shanghai
 
 jobs:
-  job:
+  docker:
     runs-on: ubuntu-latest
     steps:
-      # - uses: actions/checkout@main
-      # - uses: yanhao98/semantic-release-action@main
-      #   id: semantic
-
       - name: Login to Docker Hub
-        # if: steps.semantic.outputs.next_release_published == 'true'
         uses: docker/login-action@v3
         with:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Login to GitHub Container Registry
-        # if: steps.semantic.outputs.next_release_published == 'true'
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -33,18 +27,27 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: yanhao98/composite-actions/docker-build-push@main
-        # if: steps.semantic.outputs.next_release_published == 'true'
         id: docker-build-push
         with:
-          build_file: ./Dockerfile.test
-          build_platforms: linux/amd64,linux/arm64
-          build_push: true
-          build_load: false
-          metadata_images: |
+          file: ./Dockerfile.test
+          platforms: linux/amd64,linux/arm64
+          push: true
+          load: false
+          meta_images: |
             docker.io/${{ vars.DOCKERHUB_USERNAME }}/docker-example
             ghcr.io/${{ github.repository }}
-          metadata_tags: |
+          meta_tags: | # https://github.com/docker/metadata-action
             type=raw,value=latest,enable=true
+
+    # TODO: semantic-release-action 相关的搞到 `examples/semantic-release-action-example` 里
+      # - uses: actions/checkout@main
+      # - uses: yanhao98/semantic-release-action@main
+      #   id: semantic
+
+
+# if: steps.semantic.outputs.next_release_published == 'true'
+# if: steps.semantic.outputs.next_release_published == 'true'
+# if: steps.semantic.outputs.next_release_published == 'true'
       # type=semver,pattern={{version}},value=${{ steps.semantic.outputs.next_release_version }}
       # type=semver,pattern={{major}}.{{minor}},value=${{ steps.semantic.outputs.next_release_version }}
       # type=semver,pattern={{major}},value=${{ steps.semantic.outputs.next_release_version }}
