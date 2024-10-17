@@ -60,6 +60,10 @@ runs:
         tags: ${{ inputs.metadata_tags }}
         # sep-tags: ','
         # sep-labels: ','
+
+    - name: echo Set up QEMU
+      run: echo -e "\n[$(date +'%Y-%m-%d %H:%M:%S')] ⚙️ Set up QEMU"
+
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v3
     - name: Set up Docker Buildx
