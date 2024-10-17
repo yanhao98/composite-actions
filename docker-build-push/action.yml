@@ -45,6 +45,7 @@ runs:
       id: check-git-folder
       shell: bash
       run: |
+        # 判断是否存在 .git 文件夹
         if [ -d .git ]; then
           echo "🤖 Found .git folder"
           echo "git-folder-exists=true" >> $GITHUB_OUTPUT
