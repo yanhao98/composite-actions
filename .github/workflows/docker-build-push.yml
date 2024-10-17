@@ -39,6 +39,34 @@ jobs:
           meta_tags: | # https://github.com/docker/metadata-action
             type=raw,value=latest,enable=true
 
+  docker-load:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: yanhao98/composite-actions/docker-build-push@main
+        id: docker-build-push
+        with:
+          file: ./Dockerfile.test
+          platforms: linux/amd64
+          load: true
+      - name: Check Docker image
+        run: |
+          set -x;
+          docker images;
+          docker run --rm ${{ steps.docker-build-push.outputs.imageid }} whoami;
+
+
     # TODO: semantic-release-action 相关的搞到 `examples/semantic-release-action-example` 里
       # - uses: actions/checkout@main
       # - uses: yanhao98/semantic-release-action@main
@@ -51,8 +79,3 @@ jobs:
       # type=semver,pattern={{version}},value=${{ steps.semantic.outputs.next_release_version }}
       # type=semver,pattern={{major}}.{{minor}},value=${{ steps.semantic.outputs.next_release_version }}
       # type=semver,pattern={{major}},value=${{ steps.semantic.outputs.next_release_version }}
-      # - name: Check Docker image
-      #   run: |
-      #     set -x;
-      #     docker images;
-      #     docker run --rm ${{ steps.docker-build-push.outputs.imageid }} whoami;
