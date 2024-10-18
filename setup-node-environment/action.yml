@@ -36,7 +36,7 @@ runs:
 
         # 包管理器
         packageManager=$(node -p "require('./package.json').packageManager")
-        echo "🤖 package.json定义的包管理器: $packageManager"
+        echo "🤖 管理器(package.json): $packageManager"
         echo "packageManager=$packageManager" >> $GITHUB_OUTPUT
 
         # pnpm是否已安装
@@ -47,14 +47,14 @@ runs:
         # 判断 pnpm-lock.yaml 文件是否存在
         pnpm_lock_exists="false"
         [ -f pnpm-lock.yaml ] && pnpm_lock_exists="true"
-        echo "🤖 pnpm-lock.yaml 是否存在: $pnpm_lock_exists"
+        echo "🤖 pnpm-lock.yaml 存在: $pnpm_lock_exists"
         echo "pnpm-lock-exists=$pnpm_lock_exists" >> $GITHUB_OUTPUT
 
         # Node版本
         touch .npmrc # 如果不存在则创建 .npmrc 文件
         nodeInNpmrc=$(sed -n 's/.*use-node-version=\([0-9.]*\).*/\1/p' .npmrc)
         nodeInNpmrcMajor=$(echo $nodeInNpmrc | cut -d. -f1)
-        echo "🤖 .npmrc文件中定义的Node版本: $nodeInNpmrc -> $nodeInNpmrcMajor"
+        echo "🤖 Node版本(.npmrc): $nodeInNpmrc -> $nodeInNpmrcMajor"
         nodeVersion=${nodeInNpmrcMajor:-"lts/*"} # 如果未定义则使用默认值
 
     - uses: pnpm/action-setup@v4 # https://github.com/pnpm/action-setup?tab=readme-ov-file#inputs
