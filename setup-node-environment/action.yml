@@ -45,6 +45,7 @@ runs:
         echo "pnpmInstalled=$pnpmInstalled" >> $GITHUB_OUTPUT
 
         # 判断pnpm-lock.yaml文件是否存在
+        unset pnpm-lock-exists
         pnpm-lock-exists=$( [ -f "pnpm-lock.yaml" ] && echo "true" || echo "false" )
         echo "🤖 pnpm-lock.yaml是否存在: $pnpm-lock-exists"
         echo "pnpm-lock-exists=$pnpm-lock-exists" >> $GITHUB_OUTPUT
