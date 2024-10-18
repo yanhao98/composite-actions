@@ -14,7 +14,7 @@ jobs:
   using-checkout:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@main
       - uses: yanhao98/composite-actions/setup-node-environment@main
   no-checkout:
     runs-on: ubuntu-latest

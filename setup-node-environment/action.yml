@@ -19,69 +19,51 @@ runs:
     - id: check-git-folder
       shell: bash
       run: |
-        # 🤖 判断是否存在 .git 文件夹
+        #     🤖 判断是否存在 .git 文件夹 🤖
         [ -d .git ] && { echo "🤖 Found .git folder"; echo "git-folder-exists=true" >> $GITHUB_OUTPUT; } || { echo "🤖 No .git folder found"; echo "git-folder-exists=false" >> $GITHUB_OUTPUT; }
 
-    - uses: actions/checkout@main
+    - uses: actions/checkout@v4.2.1
       if: steps.check-git-folder.outputs.git-folder-exists == 'false'
       with:
         # fetch-depth: 0 # zero stands for full checkout, which is required for semantic-release
         filter: blob:none # we don't need all blobs, only the full tree
         show-progress: false
 
-    - name: Prepare data
-      shell: bash
+    - shell: bash
       id: prepare
       run: |
-        # 判断是否需要 pnpm/action-setup
-        echo "#############################"
-        setupPnpm=false
+        # 🤖 准备数据 🤖
+
+        # 包管理器
         packageManager=$(node -p "require('./package.json').packageManager")
-        echo "packageManager: $packageManager found in package.json"
-        if [[ "$packageManager" == "pnpm"* ]] && ! which pnpm > /dev/null; then
-          echo "the package manager is pnpm but pnpm is not installed"
-          setupPnpm=true
-        else
-          echo "the package manager is not pnpm or pnpm is already installed"
-        fi
-        echo "setupPnpm: $setupPnpm"
-        echo "setup-pnpm=$setupPnpm" >> $GITHUB_OUTPUT
-        echo ""
+        echo "🤖 package.json定义的包管理器: $packageManager"
+        echo "packageManager=$packageManager" >> $GITHUB_OUTPUT
 
-        # 判断是否需要运行 pnpm install
-        echo "#############################"
-        if [[ -f "pnpm-lock.yaml" ]]; then
-          echo "pnpm-lock.yaml exists. So pnpm install --frozen-lockfile will run"
-          echo "pnpm-lock-exists=true" >> $GITHUB_OUTPUT
-          echo "cache=pnpm" >> $GITHUB_OUTPUT
-        else
-          echo "pnpm-lock.yaml does not exist. So pnpm install will not run"
-        fi
-        echo ""
+        # pnpm是否已安装
+        pnpmInstalled=$(which pnpm > /dev/null && echo "true" || echo "false")
+        echo "🤖 pnpm是否已安装: $pnpmInstalled"
+        echo "pnpmInstalled=$pnpmInstalled" >> $GITHUB_OUTPUT
 
+        # 判断pnpm-lock.yaml文件是否存在
+        pnpm-lock-exists=$( [ -f "pnpm-lock.yaml" ] && echo "true" || echo "false" )
+        echo "🤖 pnpm-lock.yaml是否存在: $pnpm-lock-exists"
+        echo "pnpm-lock-exists=$pnpm-lock-exists" >> $GITHUB_OUTPUT
 
-        # 设置 node 版本
-        echo "#############################"
-        touch .npmrc # create .npmrc if it doesn't exist
-        nodeVersion=$(sed -n 's/.*use-node-version=\([0-9.]*\).*/\1/p' .npmrc)
-        if [[ -z "$nodeVersion" ]]; then
-          nodeVersion="lts/*"
-          echo "Node version not found in .npmrc. Using default: $nodeVersion"
-        else
-          echo "Node version found in .npmrc: $nodeVersion"
-        fi
-        echo "node-version=$nodeVersion" >> $GITHUB_OUTPUT
-        echo ""
+        # Node版本
+        touch .npmrc # 如果不存在则创建 .npmrc 文件
+        nodeInNpmrc=$(sed -n 's/.*use-node-version=\([0-9.]*\).*/\1/p' .npmrc)
+        nodeInNpmrcMajor=$(echo $nodeInNpmrc | cut -d. -f1)
+        echo "🤖 .npmrc文件中定义的Node版本: $nodeInNpmrc -> $nodeInNpmrcMajor"
+        nodeVersion=${nodeInNpmrcMajor:-"lts/*"} # 如果未定义则使用默认值
 
     - uses: pnpm/action-setup@v4 # https://github.com/pnpm/action-setup?tab=readme-ov-file#inputs
-      if: steps.prepare.outputs.setup-pnpm == 'true'
+      if: steps.prepare.outputs.pnpmInstalled == 'false'
+
     - uses: actions/setup-node@v4 # https://github.com/actions/setup-node?tab=readme-ov-file#usage
       with:
-        node-version: ${{ steps.prepare.outputs.node-version }}
-        cache: ${{ steps.prepare.outputs.cache }}
-    - run: cat .npmrc
-      shell: bash
-    - name: 📦 Install Project Dependencies
+        node-version: ${{ steps.prepare.outputs.nodeVersion }}
+        cache: ${{ steps.prepare.outputs.pnpm-lock-exists == 'true' && 'pnpm' || '' }}
+
+    - run: pnpm install --frozen-lockfile
       if: steps.prepare.outputs.pnpm-lock-exists == 'true'
-      run: pnpm install --frozen-lockfile
       shell: bash
