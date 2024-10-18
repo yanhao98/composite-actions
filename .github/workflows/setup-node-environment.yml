@@ -20,3 +20,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: yanhao98/composite-actions/setup-node-environment@main
+  using-pnpm-container:
+    runs-on: ubuntu-latest
+    container: yanhao98/runner-images:pnpm
+    steps:
+      - uses: yanhao98/composite-actions/setup-node-environment@main
+  no_npmrc_file:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@main
+      - run: rm -f .npmrc
+      - uses: yanhao98/composite-actions/setup-node-environment@main
