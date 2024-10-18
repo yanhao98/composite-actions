@@ -11,85 +11,12 @@ env:
   TZ: Asia/Shanghai
 
 jobs:
-  job-1:
-    strategy:
-      fail-fast: false
-      matrix:
-        container-image: ["", "yanhao98/runner-images:pnpm"]
-    runs-on: ubuntu-latest
-    container:
-      image: ${{ matrix.container-image }}
-    steps:
-      - name: before
-        run: |
-          set -x;
-          which pnpm || true;
-          node -v;
-
-      - uses: yanhao98/composite-actions/setup-node-environment@main
-
-      - name: Check Node and PNPM versions
-        run: |
-          set -x;
-          which pnpm;
-          node -v;
-          pnpm node -v;
-
-  npmrc_no_use_node_version:
-    strategy:
-      fail-fast: false
-      matrix:
-        os:
-          - ubuntu-latest
-          # - windows-latest
-          # - macos-latest
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@main
-      - name: before
-        run: |
-          set -x;
-          cat .npmrc;
-          sed -i '/use-node-version/d' .npmrc
-          node -v;
-          cat .npmrc;
-
-      - uses: yanhao98/composite-actions/setup-node-environment@main
-
-      - name: Check Node and PNPM versions
-        run: |
-          set -x;
-          which pnpm;
-          node -v;
-          pnpm node -v;
-
-  no_npmrc:
+  using-checkout:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@main
-      - name: before
-        run: |
-          set -x;
-          rm -f .npmrc
-
+      - uses: actions/checkout@4
       - uses: yanhao98/composite-actions/setup-node-environment@main
-
-      - name: Check Node and PNPM versions
-        run: |
-          set -x;
-          which pnpm;
-          node -v;
-          pnpm node -v;
-
-  actions_setup_node_v4:
+  no-checkout:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [18, 20, 22, lts/*]
     steps:
-      - name: "node-version: ${{ matrix.node-version }}"
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node-version }}
-      - run: ls -lha /opt/hostedtoolcache
-      - run: ls -lha /opt/hostedtoolcache/node/
+      - uses: yanhao98/composite-actions/setup-node-environment@main
