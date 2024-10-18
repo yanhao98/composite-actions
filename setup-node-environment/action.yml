@@ -36,18 +36,18 @@ runs:
 
         # 包管理器
         packageManager=$(node -p "require('./package.json').packageManager")
-        echo "🤖 管理器(package.json): $packageManager"
+        echo "🤖 包管理器(package.json): $packageManager"
         echo "packageManager=$packageManager" >> $GITHUB_OUTPUT
 
         # pnpm是否已安装
         pnpmInstalled=$(which pnpm > /dev/null && echo "true" || echo "false")
-        echo "🤖 pnpm是否已安装: $pnpmInstalled"
+        echo "🤖 已安装pnpm: $pnpmInstalled $( [ "$pnpmInstalled" == "true" ] && echo ". version: $(pnpm --version)" )"
         echo "pnpmInstalled=$pnpmInstalled" >> $GITHUB_OUTPUT
 
         # 判断 pnpm-lock.yaml 文件是否存在
         pnpm_lock_exists="false"
         [ -f pnpm-lock.yaml ] && pnpm_lock_exists="true"
-        echo "🤖 pnpm-lock.yaml 存在: $pnpm_lock_exists"
+        echo "🤖 有pnpm-lock.yaml: $pnpm_lock_exists"
         echo "pnpm-lock-exists=$pnpm_lock_exists" >> $GITHUB_OUTPUT
 
         # Node版本
