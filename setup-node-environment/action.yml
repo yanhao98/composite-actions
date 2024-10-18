@@ -44,11 +44,11 @@ runs:
         echo "🤖 pnpm是否已安装: $pnpmInstalled"
         echo "pnpmInstalled=$pnpmInstalled" >> $GITHUB_OUTPUT
 
-        # 判断pnpm-lock.yaml文件是否存在
-        pnpm-lock-exists="false"
-        [ -f pnpm-lock.yaml ] && pnpm-lock-exists="true"
-        echo "🤖 pnpm-lock.yaml是否存在: $pnpm-lock-exists"
-        echo "pnpm-lock-exists=$pnpm-lock-exists" >> $GITHUB_OUTPUT
+        # 判断 pnpm-lock.yaml 文件是否存在
+        pnpm_lock_exists="false"
+        [ -f pnpm-lock.yaml ] && pnpm_lock_exists="true"
+        echo "🤖 pnpm-lock.yaml 是否存在: $pnpm_lock_exists"
+        echo "pnpm-lock-exists=$pnpm_lock_exists" >> $GITHUB_OUTPUT
 
         # Node版本
         touch .npmrc # 如果不存在则创建 .npmrc 文件
