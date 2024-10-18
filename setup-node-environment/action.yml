@@ -56,6 +56,7 @@ runs:
         nodeInNpmrcMajor=$(echo $nodeInNpmrc | cut -d. -f1)
         echo "🤖 Node版本(.npmrc): $nodeInNpmrc -> $nodeInNpmrcMajor"
         nodeVersion=${nodeInNpmrcMajor:-"lts/*"} # 如果未定义则使用默认值
+        echo "nodeVersion=$nodeVersion" >> $GITHUB_OUTPUT
 
     - uses: pnpm/action-setup@v4 # https://github.com/pnpm/action-setup?tab=readme-ov-file#inputs
       if: steps.prepare.outputs.pnpmInstalled == 'false'
