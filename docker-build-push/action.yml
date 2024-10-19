@@ -42,11 +42,18 @@ runs:
       shell: bash
       run: echo -e "\n[$(date +'%Y-%m-%d %H:%M:%S')] 🤖🤖🤖 Start 🤖🤖🤖"
 
-    - id: check-git-folder
+    - name: Check .git folder
+      id: check-git-folder
       shell: bash
       run: |
-        #     🤖 判断是否存在 .git 文件夹 🤖
-        [ -d .git ] && { echo "🤖 Found .git folder"; echo "git-folder-exists=true" >> $GITHUB_OUTPUT; } || { echo "🤖 No .git folder found"; echo "git-folder-exists=false" >> $GITHUB_OUTPUT; }
+        # 🤖 判断是否存在 .git 文件夹 🤖
+        if [ -d .git ]; then
+          echo "🤖 Found .git folder"
+          echo "git-folder-exists=true" >> $GITHUB_OUTPUT
+        else
+          echo "🤖 No .git folder found"
+          echo "git-folder-exists=false" >> $GITHUB_OUTPUT
+        fi
 
     - uses: actions/checkout@main
       if: steps.check-git-folder.outputs.git-folder-exists == 'false'
@@ -55,7 +62,6 @@ runs:
         show-progress: false
 
     - name: Extract metadata
-      if: ${{ github.actor != 'nektos/act' }}
       id: meta
       uses: docker/metadata-action@v5
       with:
@@ -79,7 +85,7 @@ runs:
         file: ${{ inputs.file }}
         context: ${{ inputs.context }}
         platforms: ${{ inputs.platforms }}
-        push: ${{ inputs.push && github.actor != 'nektos/act' }}
+        push: ${{ inputs.push }}
         load: ${{ inputs.load }}
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
