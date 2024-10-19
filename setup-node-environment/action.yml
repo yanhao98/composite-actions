@@ -58,6 +58,9 @@ runs:
         nodeVersion=${nodeInNpmrcMajor:-"lts/*"} # 如果未定义则使用默认值
         echo "nodeVersion=$nodeVersion" >> $GITHUB_OUTPUT
 
+        sed -i '/use-node-version/d' .npmrc;
+        sed -i '/node-mirror/d' .npmrc;
+
     - uses: pnpm/action-setup@v4 # https://github.com/pnpm/action-setup?tab=readme-ov-file#inputs
       if: steps.prepare.outputs.pnpmInstalled == 'false'
 
