@@ -22,7 +22,7 @@ runs:
         # 🤖----判断是否存在 .git 文件夹----🤖 #
         [ -d .git ] && { echo "🤖 Found .git folder"; echo "git-folder-exists=true" >> $GITHUB_OUTPUT; } || { echo "🤖 No .git folder found"; echo "git-folder-exists=false" >> $GITHUB_OUTPUT; }
 
-    - uses: actions/checkout@v4.2.1
+    - uses: actions/checkout@v4.2.2
       if: steps.check-git-folder.outputs.git-folder-exists == 'false'
       with:
         # fetch-depth: 0 # zero stands for full checkout, which is required for semantic-release
