@@ -35,9 +35,16 @@ runs:
         # 🤖 准备数据 🤖
 
         # 包管理器
-        packageManager=$(node -p "require('./package.json').packageManager")
+        packageManager=$(node -p "try { require('./package.json').packageManager; } catch(e) { '' }")
         echo "🤖 包管理器(package.json): $packageManager"
         echo "packageManager=$packageManager" >> $GITHUB_OUTPUT
+
+        # 设置pnpm版本
+        pnpmVersion=""
+        if [ -z "$packageManager" ]; then
+          pnpmVersion="latest"
+        fi
+        echo "pnpmVersion=$pnpmVersion" >> $GITHUB_OUTPUT
 
         # pnpm是否已安装
         pnpmInstalled=$(which pnpm > /dev/null && echo "true" || echo "false")
@@ -63,6 +70,8 @@ runs:
 
     - uses: pnpm/action-setup@v4 # https://github.com/pnpm/action-setup?tab=readme-ov-file#inputs
       if: steps.prepare.outputs.pnpmInstalled == 'false'
+      with:
+        version: ${{ steps.prepare.outputs.pnpmVersion }}
 
     - uses: actions/setup-node@v4 # https://github.com/actions/setup-node?tab=readme-ov-file#usage
       with:

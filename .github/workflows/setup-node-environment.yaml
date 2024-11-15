@@ -31,3 +31,19 @@ jobs:
       - uses: actions/checkout@main
       - run: rm -f .npmrc
       - uses: yanhao98/composite-actions/setup-node-environment@main
+  with-package-manager:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@main
+      - name: Add packageManager to package.json
+        run: |
+          node -e "const pkg = require('./package.json'); pkg.packageManager = 'pnpm@9.12.2'; require('fs').writeFileSync('package.json', JSON.stringify(pkg, null, 2))"
+      - uses: yanhao98/composite-actions/setup-node-environment@main
+  without-package-manager:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@main
+      - name: Remove packageManager from package.json
+        run: |
+          node -e "const pkg = require('./package.json'); delete pkg.packageManager; require('fs').writeFileSync('package.json', JSON.stringify(pkg, null, 2))"
+      - uses: yanhao98/composite-actions/setup-node-environment@main
