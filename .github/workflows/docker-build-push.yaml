@@ -2,11 +2,11 @@ on:
   pull_request:
     paths:
       - "docker-build-push/**"
-      - ".github/workflows/docker-build-push.yml"
+      - ".github/workflows/docker-build-push.yaml"
   push:
     paths:
       - "docker-build-push/**"
-      - ".github/workflows/docker-build-push.yml"
+      - ".github/workflows/docker-build-push.yaml"
 env:
   TZ: Asia/Shanghai
 

@@ -1,12 +1,12 @@
 on:
   pull_request:
     paths:
-      - "deploy-dist-to-surge.yml/**"
-      - ".github/workflows/deploy-dist-to-surge.yml"
+      - "deploy-dist-to-surge/**"
+      - ".github/workflows/deploy-dist-to-surge.yaml"
   push:
     paths:
-      - "deploy-dist-to-surge.yml/**"
-      - ".github/workflows/deploy-dist-to-surge.yml"
+      - "deploy-dist-to-surge/**"
+      - ".github/workflows/deploy-dist-to-surge.yaml"
 env:
   TZ: Asia/Shanghai
 
