@@ -19,7 +19,7 @@ runs:
     - id: check-git-folder
       shell: bash
       run: |
-        #     🤖 判断是否存在 .git 文件夹 🤖
+        # 🤖----判断是否存在 .git 文件夹----🤖 #
         [ -d .git ] && { echo "🤖 Found .git folder"; echo "git-folder-exists=true" >> $GITHUB_OUTPUT; } || { echo "🤖 No .git folder found"; echo "git-folder-exists=false" >> $GITHUB_OUTPUT; }
 
     - uses: actions/checkout@v4.2.1
@@ -32,7 +32,7 @@ runs:
     - shell: bash
       id: prepare
       run: |
-        # 🤖 准备数据 🤖
+        # 🤖----准备数据----🤖 #
 
         # 包管理器
         packageManager=$(node -p "try { require('./package.json').packageManager; } catch(e) { '' }")
@@ -41,7 +41,7 @@ runs:
 
         # 设置pnpm版本
         pnpmVersion=""
-        if [ -z "$packageManager" ]; then
+        if [ -z "$packageManager" ] || [ "$packageManager" == "undefined" ]; then
           pnpmVersion="latest"
         fi
         echo "pnpmVersion=$pnpmVersion" >> $GITHUB_OUTPUT
