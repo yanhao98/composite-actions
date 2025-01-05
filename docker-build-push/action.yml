@@ -31,6 +31,12 @@ inputs:
   meta_tags:
     description: "docker/metadata-action 的 tags 参数"
     required: false
+  cache-from:
+    description: "docker/build-push-action 的 cache-from 参数"
+    required: false
+  cache-to:
+    description: "docker/build-push-action 的 cache-to 参数"
+    required: false
 outputs:
   imageid:
     description: "Docker 镜像 ID"
@@ -81,10 +87,12 @@ runs:
         load: ${{ inputs.load }}
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
+        # cache-from: type=gha
+        # cache-to: type=gha,mode=max
         # cache-from: type=local,src=/tmp/.buildx-cache
         # cache-to: type=local,dest=/tmp/.buildx-cache
+        cache-from: ${{ inputs.cache-from }}
+        cache-to: ${{ inputs.cache-to }}
 
     - name: echo End
       shell: bash
