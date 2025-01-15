@@ -11,10 +11,15 @@
 #       - name : 📦 Setup Node + PNPM + install deps
 #         uses: ./.github/actions/setup-node-pnpm-install
 
-name: "Setup Node Environment"
-description: "Setup pnpm + Node.js + install dependencies"
+name: 'Setup Node Environment'
+description: 'Setup pnpm + Node.js + install dependencies'
+inputs:
+  pnpm_standalone: # https://github.com/pnpm/action-setup?tab=readme-ov-file#standalone
+    description: 'Whether to use pnpm as a standalone package'
+    required: false
+    default: 'false'
 runs:
-  using: "composite"
+  using: 'composite'
   steps:
     - id: check-git-folder
       shell: bash
@@ -72,6 +77,7 @@ runs:
       if: steps.prepare.outputs.pnpmInstalled == 'false'
       with:
         version: ${{ steps.prepare.outputs.pnpmVersion }}
+        standalone: ${{ inputs.pnpm_standalone }}
 
     - uses: actions/setup-node@v4 # https://github.com/actions/setup-node?tab=readme-ov-file#usage
       with:
