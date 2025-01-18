@@ -9,7 +9,7 @@ importers:
   .:
     dependencies:
       bun:
-        specifier: ^1.1.44
+        specifier: ^1.1.45
         version: 1.1.45
 
 packages:
