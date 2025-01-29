@@ -1,6 +1,6 @@
 {
   "packageManager": "pnpm@9.15.4",
   "dependencies": {
-    "bun": "^1.2.0"
+    "bun": "^1.2.1"
   }
 }
