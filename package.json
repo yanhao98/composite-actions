@@ -1,5 +1,5 @@
 {
-  "packageManager": "pnpm@9.15.5",
+  "packageManager": "pnpm@10.1.0",
   "dependencies": {
     "bun": "^1.2.2"
   }
