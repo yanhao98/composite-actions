@@ -1,1 +1,4 @@
 FROM alpine:latest
+ARG SHA
+ENV SHA=$SHA
+RUN echo $SHA > /root/sha.txt

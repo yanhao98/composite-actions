@@ -37,6 +37,9 @@ inputs:
   cache-to:
     description: "docker/build-push-action 的 cache-to 参数"
     required: false
+  build-args:
+    description: "Docker 构建参数，格式如: KEY1=VALUE1,KEY2=VALUE2"
+    required: false
 outputs:
   imageid:
     description: "Docker 镜像 ID"
@@ -87,12 +90,9 @@ runs:
         load: ${{ inputs.load }}
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
-        # cache-from: type=gha
-        # cache-to: type=gha,mode=max
-        # cache-from: type=local,src=/tmp/.buildx-cache
-        # cache-to: type=local,dest=/tmp/.buildx-cache
         cache-from: ${{ inputs.cache-from }}
         cache-to: ${{ inputs.cache-to }}
+        build-args: ${{ inputs.build-args }}
 
     - name: echo End
       shell: bash

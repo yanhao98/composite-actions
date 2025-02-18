@@ -60,22 +60,30 @@ jobs:
           file: ./Dockerfile.test
           platforms: linux/amd64
           load: true
+          build-args: |
+            SHA=$(git rev-parse HEAD)
       - name: Check Docker image
         run: |
           set -x;
           docker images;
-          docker run --rm ${{ steps.docker-build-push.outputs.imageid }} whoami;
+          docker run --rm ${{ steps.docker-build-push.outputs.imageid }} cat /root/sha.txt;
 
 
-    # TODO: semantic-release-action 相关的搞到 `examples/semantic-release-action-example` 里
-      # - uses: actions/checkout@main
-      # - uses: yanhao98/semantic-release-action@main
-      #   id: semantic
+# TODO: semantic-release-action 相关的搞到 `examples/semantic-release-action-example` 里
+  # - uses: actions/checkout@main
+  # - uses: yanhao98/semantic-release-action@main
+  #   id: semantic
 
 
 # if: steps.semantic.outputs.next_release_published == 'true'
 # if: steps.semantic.outputs.next_release_published == 'true'
 # if: steps.semantic.outputs.next_release_published == 'true'
-      # type=semver,pattern={{version}},value=${{ steps.semantic.outputs.next_release_version }}
-      # type=semver,pattern={{major}}.{{minor}},value=${{ steps.semantic.outputs.next_release_version }}
-      # type=semver,pattern={{major}},value=${{ steps.semantic.outputs.next_release_version }}
+# type=semver,pattern={{version}},value=${{ steps.semantic.outputs.next_release_version }}
+# type=semver,pattern={{major}}.{{minor}},value=${{ steps.semantic.outputs.next_release_version }}
+# type=semver,pattern={{major}},value=${{ steps.semantic.outputs.next_release_version }}
+
+
+# cache-from: type=gha
+# cache-to: type=gha,mode=max
+# cache-from: type=local,src=/tmp/.buildx-cache
+# cache-to: type=local,dest=/tmp/.buildx-cache
