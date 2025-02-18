@@ -52,12 +52,13 @@ runs:
       run: echo -e "\n[$(date +'%Y-%m-%d %H:%M:%S')] 🤖🤖🤖 Start 🤖🤖🤖"
 
     - id: check-git-folder
+      if: ${{ env.CALLED_DOCKER_BUILD_PUSH != 'true' }}
       shell: bash
       run: |
         #     🤖 判断是否存在 .git 文件夹 🤖
         [ -d .git ] && { echo "🤖 Found .git folder"; echo "git-folder-exists=true" >> $GITHUB_OUTPUT; } || { echo "🤖 No .git folder found"; echo "git-folder-exists=false" >> $GITHUB_OUTPUT; }
     - uses: actions/checkout@main
-      if: steps.check-git-folder.outputs.git-folder-exists == 'false'
+      if: steps.check-git-folder.outputs.git-folder-exists == 'false' && env.CALLED_DOCKER_BUILD_PUSH != 'true'
       with:
         filter: blob:none
         show-progress: false
@@ -74,9 +75,11 @@ runs:
         # sep-labels: ','
 
     - name: Set up QEMU
+      if: ${{ env.CALLED_DOCKER_BUILD_PUSH != 'true' }}
       uses: docker/setup-qemu-action@v3
 
     - name: Set up Docker Buildx
+      if: ${{ env.CALLED_DOCKER_BUILD_PUSH != 'true' }}
       uses: docker/setup-buildx-action@v3
 
     - name: Build and push
@@ -96,4 +99,6 @@ runs:
 
     - name: echo End
       shell: bash
-      run: echo -e "\n[$(date +'%Y-%m-%d %H:%M:%S')] 🤖🤖🤖 End 🤖🤖🤖"
+      run: |
+        echo -e "\n[$(date +'%Y-%m-%d %H:%M:%S')] 🤖🤖🤖 End 🤖🤖🤖"
+        echo "CALLED_DOCKER_BUILD_PUSH=true" >> $GITHUB_ENV

@@ -62,6 +62,15 @@ jobs:
           load: true
           build-args: |
             SHA=${{ github.sha }}
+      - name: 第二次使用
+        uses: yanhao98/composite-actions/docker-build-push@main
+        id: docker-build-push-2
+        with:
+          file: ./Dockerfile.test
+          platforms: linux/amd64
+          load: true
+          build-args: |
+            SHA=${{ github.sha }}
       - name: Check Docker image
         run: |
           set -x;
