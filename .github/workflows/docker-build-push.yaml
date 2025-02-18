@@ -61,7 +61,7 @@ jobs:
           platforms: linux/amd64
           load: true
           build-args: |
-            SHA=$(git rev-parse HEAD)
+            SHA=${{ github.sha }}
       - name: Check Docker image
         run: |
           set -x;
