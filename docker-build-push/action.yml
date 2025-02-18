@@ -40,6 +40,10 @@ inputs:
   build-args:
     description: "Docker 构建参数，格式如: KEY1=VALUE1,KEY2=VALUE2"
     required: false
+  need-qemu:
+    description: "是否需要 QEMU"
+    default: "false"
+    required: false
 outputs:
   imageid:
     description: "Docker 镜像 ID"
@@ -74,6 +78,7 @@ runs:
         # sep-labels: ','
 
     - name: Set up QEMU
+      if: ${{ inputs.need-qemu }} == 'true'
       uses: docker/setup-qemu-action@v3
 
     - name: Set up Docker Buildx
