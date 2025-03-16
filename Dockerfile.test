@@ -1,4 +1,12 @@
+# syntax=docker/dockerfile:1.14-labs
 FROM alpine:latest
+
 ARG SHA=unspecified
 ENV SHA=$SHA
-RUN echo $SHA > /root/sha.txt
+
+COPY <<EOF /root/sha.txt
+$SHA
+EOF
+
+
+
