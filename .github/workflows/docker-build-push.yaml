@@ -83,7 +83,7 @@ jobs:
           build-args: |
             SHA=${{ github.sha }}
           cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new
       # Temp fix: 如果要在一个 job 中多次使用 buildx 缓存才需要这个步骤。
       # https://github.com/docker/build-push-action/issues/252
       # https://github.com/moby/buildkit/issues/1896
