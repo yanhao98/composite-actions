@@ -18,8 +18,9 @@ inputs:
     description: '是否将 pnpm 用作独立包'
     required: false
     default: 'false'
-  package_json_cwd: # https://github.com/pnpm/action-setup/blob/d648c2dd069001a242c621c8306af467f150e99d/action.yml#L18C3-L18C20
-    description: 'package.json 的所在目录'
+  # https://github.com/pnpm/action-setup/blob/d648c2dd069001a242c621c8306af467f150e99d/action.yml#L18C3-L18C20
+  working-directory:
+    description: '工作目录'
     required: false
     default: '.'
 runs:
@@ -40,7 +41,7 @@ runs:
 
     - id: prepare
       shell: bash
-      working-directory: ${{ inputs.package_json_cwd }}
+      working-directory: ${{ inputs.working-directory }}
       run: |
         # 🤖---- 准备环境变量 ----🤖 #
 
@@ -185,7 +186,7 @@ runs:
       shell: bash
 
     - if: steps.cache-pnpm-restore.outputs.cache-hit == 'true'
-      working-directory: ${{ inputs.package_json_cwd }}
+      working-directory: ${{ inputs.working-directory }}
       shell: bash
       run: |
         echo "🤖---- 缓存命中，安装依赖 ----🤖"
@@ -194,7 +195,7 @@ runs:
         # ERR_PNPM_NO_LOCKFILE  Cannot install with "frozen-lockfile" because pnpm-lock.yaml is absent
 
     - if: steps.cache-pnpm-restore.outputs.cache-hit != 'true'
-      working-directory: ${{ inputs.package_json_cwd }}
+      working-directory: ${{ inputs.working-directory }}
       shell: bash
       run: |
         echo "🤖---- 缓存未命中，安装依赖 ----🤖"
@@ -211,7 +212,6 @@ runs:
       with:
         path: ${{ steps.pnpm-store-dir.outputs.pnpmStoreDir }}
         key: ${{ steps.cache-pnpm-restore.outputs.cache-primary-key }}
-
 # # https://github.com/pnpm/pnpm/issues/7192#issuecomment-2353298966
 # package-import-method=hardlink
 
@@ -219,6 +219,6 @@ runs:
 # pnpm fetch
 # pnpm install --offline
 # pnpm store prune
-# # 
+# #
 # rm -r node_modules
 # pnpm install --offline
