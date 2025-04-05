@@ -182,6 +182,7 @@ runs:
         restore-keys: |
           ${{ runner.os }}-pnpm-store-
 
+    # https://github.com/pnpm/pnpm/issues/7192#issuecomment-2353298966
     - run: echo "package-import-method=hardlink" >> .npmrc
       shell: bash
 
@@ -208,18 +209,15 @@ runs:
 
     - name: 📊 显示缓存命中状态
       run: |
-            echo "cache-hit: ${{ steps.cache-pnpm-restore.outputs.cache-hit }}"
+        echo "cache-hit: ${{ steps.cache-pnpm-restore.outputs.cache-hit }}"
       shell: bash
 
     - id: cache-pnpm-save
-      if: always() && steps.cache-pnpm-restore.outputs.cache-hit == 'false'
+      if: always() && steps.cache-pnpm-restore.outputs.cache-hit != 'true'
       uses: actions/cache/save@v4
       with:
         path: ${{ steps.pnpm-store-dir.outputs.pnpmStoreDir }}
         key: ${{ steps.cache-pnpm-restore.outputs.cache-primary-key }}
-# # https://github.com/pnpm/pnpm/issues/7192#issuecomment-2353298966
-# package-import-method=hardlink
-
 # rm -r node_modules
 # pnpm fetch
 # pnpm install --offline
