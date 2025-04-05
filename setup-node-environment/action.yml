@@ -159,6 +159,7 @@ runs:
     - uses: pnpm/action-setup@v4 # https://github.com/pnpm/action-setup?tab=readme-ov-file#inputs
       if: steps.prepare.outputs.pnpmInstalled == 'false'
       with:
+        # https://github.com/pnpm/action-setup/blob/master/action.yml
         version: ${{ steps.prepare.outputs.pnpmVersion }}
         standalone: ${{ inputs.pnpm_standalone }}
         package_json_file: ${{ inputs.working-directory }}/package.json
