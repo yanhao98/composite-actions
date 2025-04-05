@@ -161,6 +161,7 @@ runs:
       with:
         version: ${{ steps.prepare.outputs.pnpmVersion }}
         standalone: ${{ inputs.pnpm_standalone }}
+        package_json_file: ${{ inputs.working-directory }}/package.json
 
     - uses: actions/setup-node@v4 # https://github.com/actions/setup-node?tab=readme-ov-file#usage
       with:
