@@ -205,7 +205,11 @@ runs:
         #  --frozen-lockfile
         # ERR_PNPM_NO_LOCKFILE  Cannot install with "frozen-lockfile" because pnpm-lock.yaml is absent
         pnpm store prune
-        echo "cache-hit: ${{ steps.cache-pnpm-restore.outputs.cache-hit }}"
+
+    - name: 📊 显示缓存命中状态
+      run: |
+            echo "cache-hit: ${{ steps.cache-pnpm-restore.outputs.cache-hit }}"
+      shell: bash
 
     - id: cache-pnpm-save
       if: always() && steps.cache-pnpm-restore.outputs.cache-hit == 'false'
