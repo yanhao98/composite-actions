@@ -120,6 +120,7 @@ jobs:
           pwd
           cat pnpm-lock.yaml
 
-      - uses: yanhao98/composite-actions/setup-node-environment@main
+      - name: ⚙️ 设置 Node 环境
+        uses: yanhao98/composite-actions/setup-node-environment@main
         with:
           working-directory: ${{ matrix.cwd }}
