@@ -56,9 +56,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        container:
-          - 'yanhao98/runner-images:pnpm'
-          - '' # gitea/runner-images:ubuntu-latest
         npmrc_content:
           - ''
           - |
@@ -69,13 +66,11 @@ jobs:
         cwd:
           - ''
           - 'test'
-    container: ${{ matrix.container }}
     steps:
       # - uses: actions/checkout@main
       - name: 打印 matrix
         run: |
           echo "🤖---- 打印 matrix ----🤖"
-          echo "container: ${{ matrix.container }}"
           echo "npmrc_content: ${{ matrix.npmrc_content }}"
           echo "lock_file: ${{ matrix.lock_file }}"
           echo "cwd: ${{ matrix.cwd }}"
