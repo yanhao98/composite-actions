@@ -180,9 +180,9 @@ runs:
       uses: actions/cache/restore@v4 # https://github.com/actions/cache/blob/main/restore/action.yml
       with:
         path: ${{ steps.pnpm-store-dir.outputs.pnpmStoreDir }}
-        key: ${{ runner.os }}-pnpm-store-${{ github.repository_id }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+        key: ${{ runner.os }}-pnpm-store-id${{ github.event.repository.id }}-${{ hashFiles('**/pnpm-lock.yaml') }}
         restore-keys: |
-          ${{ runner.os }}-pnpm-store-${{ github.repository_id }}-
+          ${{ runner.os }}-pnpm-store-id${{ github.event.repository.id }}-
           ${{ runner.os }}-pnpm-store-
 
     # https://github.com/pnpm/pnpm/issues/7192#issuecomment-2353298966
