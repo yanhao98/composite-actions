@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code # Required to use the local version of the action
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: 准备部署文件 (Testing working_dir and dist_dir)
         run: |
