@@ -10,11 +10,12 @@ Deploys a distribution folder (typically `dist/`) to Surge.sh.
 
 #### Inputs
 
-| Name          | Description                                                                                                     | Required | Default |
+| 名称          | 描述                                                                                                     | 是否必须 | 默认值 |
 |---------------|-----------------------------------------------------------------------------------------------------------------|----------|---------|
-| `working_dir` | The working directory to run the Surge deployment from. Defaults to the repository root.                        | `false`  | `.`     |
-| `dist_dir`    | The directory containing the built assets to deploy. Relative to `working_dir` if specified, otherwise relative to repository root. | `false`  | `dist`  |
-| `surge_token` | **Deprecated.** The Surge token to use for deployment. It's recommended to set this as an environment variable `SURGE_TOKEN` in your workflow instead. | `false`  | (Reads from `SURGE_TOKEN` env var or uses hardcoded token if not set) |
+| `working_dir` | 执行 Surge 部署的工作目录。默认为仓库根目录。                                                                       | `false`  | `.`     |
+| `dist_dir`    | 包含要部署的构建产物的目录。如果指定了 `working_dir`，则相对于 `working_dir`，否则相对于仓库根目录。                                     | `false`  | `dist`  |
+| `domain_suffix` | 部署时用于创建唯一域名的后缀（例如，用于在同一工作流程中测试多个实例）。最终域名将是 `<sha><suffix>.surge.sh`。                                   | `false`  | `''`    |
+| `surge_token` | **已弃用.** 用于部署的 Surge 令牌。建议在工作流程中将其设置为环境变量 `SURGE_TOKEN`。                                                        | `false`  | (从 `SURGE_TOKEN` 环境变量读取，如果未设置则使用硬编码令牌) |
 
 
 #### Outputs

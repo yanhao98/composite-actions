@@ -29,6 +29,7 @@ jobs:
         with:
           working_dir: ./test_project
           dist_dir: build_output
+          domain_suffix: -custom
 
       - name: Check Surge URL (Custom Dirs)
         run: |
@@ -48,6 +49,8 @@ jobs:
       - name: Deploy with default dist_dir
         uses: ./deploy-dist-to-surge # Use local action
         id: surge_deploy_default
+        with:
+          domain_suffix: -default
 
       - name: Check Surge URL (Default Dist)
         run: |
