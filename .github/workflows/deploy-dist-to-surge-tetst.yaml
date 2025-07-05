@@ -14,13 +14,48 @@ jobs:
   job:
     runs-on: ubuntu-latest
     steps:
-      - name: 准备部署文件
+      - name: Checkout code # Required to use the local version of the action
+        uses: actions/checkout@v3
+
+      - name: 准备部署文件 (Testing working_dir and dist_dir)
+        run: |
+          mkdir -p test_project/build_output
+          html="<!DOCTYPE html><html><body><h1>Test: ${{ github.event_name }}: ${{ github.sha }} - Custom Dirs</h1></body></html>"
+          echo $html > test_project/build_output/index.html
+
+      - name: Deploy with custom working_dir and dist_dir
+        uses: ./deploy-dist-to-surge # Use local action
+        id: surge_deploy_custom
+        with:
+          working_dir: ./test_project
+          dist_dir: build_output
+
+      - name: Check Surge URL (Custom Dirs)
+        run: |
+          echo "Custom dirs deployment URL: ${{ steps.surge_deploy_custom.outputs.url }}"
+          # Add a basic check if the URL is not empty
+          if [ -z "${{ steps.surge_deploy_custom.outputs.url }}" ]; then
+            echo "Error: Surge URL for custom dirs is empty!"
+            exit 1
+          fi
+
+      - name: 准备部署文件 (Testing default dist_dir)
         run: |
           mkdir dist
-          html="<!DOCTYPE html><html><body><h1>${{ github.event_name }}: ${{ github.sha }}</h1></body></html>"
+          html="<!DOCTYPE html><html><body><h1>Test: ${{ github.event_name }}: ${{ github.sha }} - Default Dist</h1></body></html>"
           echo $html > dist/index.html
-      - uses: yanhao98/composite-actions/deploy-dist-to-surge@main
-        id: surge_deploy
-      - name: Check Surge URL
+
+      - name: Deploy with default dist_dir
+        uses: ./deploy-dist-to-surge # Use local action
+        id: surge_deploy_default
+
+      - name: Check Surge URL (Default Dist)
         run: |
-          echo "steps.surge_deploy.outputs.url: ${{ steps.surge_deploy.outputs.url }}"
+          echo "Default dist deployment URL: ${{ steps.surge_deploy_default.outputs.url }}"
+          # Add a basic check if the URL is not empty
+          if [ -z "${{ steps.surge_deploy_default.outputs.url }}" ]; then
+            echo "Error: Surge URL for default dist is empty!"
+            exit 1
+          fi
+          # The following line was from the old version and is redundant as we check specific outputs above.
+          # echo "steps.surge_deploy.outputs.url: ${{ steps.surge_deploy.outputs.url }}"
