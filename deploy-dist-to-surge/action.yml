@@ -1,5 +1,14 @@
 name: "Deploy dist to Surge"
 description: "部署 dist 到 Surge"
+inputs:
+  working_dir:
+    description: 'The working directory to run the Surge deployment from. Defaults to the repository root.'
+    required: false
+    default: '.'
+  dist_dir:
+    description: 'The directory containing the built assets to deploy. Relative to `working_dir` if specified, otherwise relative to repository root.'
+    required: false
+    default: 'dist'
 outputs:
   url:
     description: "Preview URL"
@@ -15,8 +24,9 @@ runs:
       # https://github.com/Tencent/tdesign-vue-next/blob/03036a19adccf4657d7792e3a61a6c6a7d902e3e/.github/workflows/preview-publish.yml
       # https://github.com/Tencent/tdesign/blob/0c0c9b63897c05d10c58e1a1e36feda2cb99eca7/.github/workflows/preview.yml#L40
       run: |
+        if [ "${{ inputs.working_dir }}" != "." ]; then cd ${{ inputs.working_dir }}; fi
         export DEPLOY_DOMAIN=https://${{ github.sha }}.surge.sh
-        cp dist/index.html dist/200.html
-        npx surge --project ./dist --domain $DEPLOY_DOMAIN --token d843de16b331c626f10771245c56ed93 # npx surge token
+        cp ${{ inputs.dist_dir }}/index.html ${{ inputs.dist_dir }}/200.html
+        npx surge --project ./${{ inputs.dist_dir }} --domain $DEPLOY_DOMAIN --token d843de16b331c626f10771245c56ed93 # npx surge token
         echo the preview URL is $DEPLOY_DOMAIN
         echo "url=$DEPLOY_DOMAIN" >> $GITHUB_OUTPUT
