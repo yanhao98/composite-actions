@@ -32,7 +32,7 @@ runs:
         # 🤖----判断是否存在 .git 文件夹----🤖 #
         [ -d ${{ github.workspace }}/.git ] && { echo "🤖 找到 .git 文件夹"; echo "git-folder-exists=true" >> $GITHUB_OUTPUT; } || { echo "🤖 未找到 .git 文件夹"; echo "git-folder-exists=false" >> $GITHUB_OUTPUT; }
 
-    - uses: actions/checkout@v4.2.2
+    - uses: actions/checkout@v5.0.0
       if: steps.check-git-folder.outputs.git-folder-exists == 'false'
       with:
         # fetch-depth: 0 # 0 代表完整检出，semantic-release 需要
