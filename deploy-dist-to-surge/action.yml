@@ -1,0 +1,37 @@
+name: "Deploy dist to Surge"
+description: "部署 dist 到 Surge"
+inputs:
+  working_dir:
+    description: '执行 Surge 部署的工作目录。默认为仓库根目录。'
+    required: false
+    default: '.'
+  dist_dir:
+    description: '包含要部署的构建产物的目录。如果指定了 `working_dir`，则相对于 `working_dir`，否则相对于仓库根目录。'
+    required: false
+    default: 'dist'
+  domain_suffix:
+    description: '部署时用于创建唯一域名的后缀（例如，用于在同一工作流程中测试多个实例）。最终域名将是 `<sha><suffix>.surge.sh`。'
+    required: false
+    default: ''
+outputs:
+  url:
+    description: "Preview URL"
+    value: ${{ steps.surge_deploy.outputs.url }}
+runs:
+  using: "composite"
+  steps:
+    - name: 部署到 Surge
+      shell: bash
+      id: surge_deploy
+      # https://github.com/afc163/surge-preview
+      # https://github.com/Tencent/tdesign-vue-next/pull/1604#issuecomment-1236244550
+      # https://github.com/Tencent/tdesign-vue-next/blob/03036a19adccf4657d7792e3a61a6c6a7d902e3e/.github/workflows/preview-publish.yml
+      # https://github.com/Tencent/tdesign/blob/0c0c9b63897c05d10c58e1a1e36feda2cb99eca7/.github/workflows/preview.yml#L40
+      run: |
+        if [ "${{ inputs.working_dir }}" != "." ]; then cd ${{ inputs.working_dir }}; fi
+        export DEPLOY_DOMAIN_PREFIX=${{ github.sha }}${{ inputs.domain_suffix }}
+        export DEPLOY_DOMAIN=https://${DEPLOY_DOMAIN_PREFIX}.surge.sh
+        cp ${{ inputs.dist_dir }}/index.html ${{ inputs.dist_dir }}/200.html
+        npx surge --project ./${{ inputs.dist_dir }} --domain $DEPLOY_DOMAIN --token d843de16b331c626f10771245c56ed93 # npx surge token
+        echo the preview URL is $DEPLOY_DOMAIN
+        echo "url=$DEPLOY_DOMAIN" >> $GITHUB_OUTPUT

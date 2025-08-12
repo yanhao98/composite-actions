@@ -1,0 +1,50 @@
+on:
+  pull_request:
+    paths:
+      - "upload-to-alist/**"
+      - ".github/workflows/upload-to-alist-example-test.yaml"
+  push:
+    paths:
+      - "upload-to-alist/**"
+      - ".github/workflows/upload-to-alist-example-test.yaml"
+
+env:
+  TZ: Asia/Shanghai
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@main
+
+      - name: 📝 生成构建产物的文件名
+        id: filename
+        run: |
+          PROJECT_NAME=$(echo ${{ github.repository }} | cut -d'/' -f2)
+          DATE=$(date '+%Y%m%d_%H%M')
+          SHORT_HASH=$(git rev-parse --short HEAD)
+
+          FILENAME="${PROJECT_NAME}_${DATE}_${SHORT_HASH}.txt"
+          echo "📝 生成的文件名: $FILENAME"
+          echo "FILENAME=${FILENAME}" >> $GITHUB_OUTPUT
+
+      - name: Create test file
+        run: |
+          cat > ${{ steps.filename.outputs.FILENAME }} << EOF
+          # 测试文件
+          
+          - 项目: ${{ github.repository }}
+          - 分支: ${{ github.ref_name }}
+          - 提交: $(git rev-parse HEAD)
+          - 时间: $(date '+%Y-%m-%d %H:%M:%S %Z')
+          - 触发事件: ${{ github.event_name }}
+          EOF
+
+      - uses: yanhao98/composite-actions/upload-to-alist@main
+        with:
+          alist_url: ${{ vars.ALIST_URL }}
+          alist_username: ${{ secrets.ALIST_USERNAME }}
+          alist_password: ${{ secrets.ALIST_PASSWORD }}
+          alist_target: ${{ vars.alist_target_base }}/github-actions/upload-to-alist/${{ steps.filename.outputs.FILENAME }}
+          file: ${{ steps.filename.outputs.FILENAME }}

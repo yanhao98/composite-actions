@@ -1,0 +1,26 @@
+on:
+  pull_request:
+    paths:
+      - "npm-build-fix-to-nexus/**"
+      - ".github/workflows/npm-build-fix-to-nexus-test.yaml"
+  push:
+    paths:
+      - "npm-build-fix-to-nexus/**"
+      - ".github/workflows/npm-build-fix-to-nexus-test.yaml"
+env:
+  TZ: Asia/Shanghai
+
+jobs:
+  upload_npm_fix_to_nexus:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Prepare
+        run: |
+          mkdir npm-build-fix-to-nexus
+      - uses: yanhao98/composite-actions/npm-build-fix-to-nexus@main
+        with:
+          package_json_url: 'https://www.unpkg.com/fuck-your-code/package.json'
+          pack_workspace: './npm-build-fix-to-nexus'
+          build_command: 'whoami'
+          nexus_post_url: 'https://nexus.oo1.dev/service/rest/v1/components?repository=npm-hosted'
+          nexus_auth: ${{ secrets.NEXUS_AUTH }}

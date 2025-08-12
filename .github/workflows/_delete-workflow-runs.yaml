@@ -1,0 +1,66 @@
+name: 删除旧的工作流运行
+on:
+  workflow_dispatch:
+    inputs:
+      days:
+        description: '为每个工作流保留的运行天数'
+        required: true
+        default: '30'
+      minimum_runs:
+        description: '为每个工作流保留的最小运行次数'
+        required: true
+        default: '6'
+      delete_workflow_pattern:
+        description: '工作流的名称或文件名（如果未设置，则针对所有工作流）'
+        required: false
+      delete_workflow_by_state_pattern:
+        description: '按状态筛选工作流：active, deleted, disabled_fork, disabled_inactivity, disabled_manually'
+        required: true
+        default: "ALL"
+        type: choice
+        options:
+          - "ALL"
+          - active
+          - deleted
+          - disabled_inactivity
+          - disabled_manually
+      delete_run_by_conclusion_pattern:
+        description: '根据结论删除运行：action_required, cancelled, failure, skipped, success'
+        required: true
+        default: "ALL"
+        type: choice
+        options:
+          - "ALL"
+          - "Unsuccessful: action_required,cancelled,failure,skipped"
+          - action_required
+          - cancelled
+          - failure
+          - skipped
+          - success
+      dry_run:
+        description: '记录模拟的更改，不执行任何删除操作'
+        required: false
+
+jobs:
+  del_runs:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: read
+    steps:
+      - name: 删除工作流运行
+        uses: Mattraks/delete-workflow-runs@v2
+        with:
+          token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          retain_days: ${{ github.event.inputs.days }}
+          keep_minimum_runs: ${{ github.event.inputs.minimum_runs }}
+          delete_workflow_pattern: ${{ github.event.inputs.delete_workflow_pattern }}
+          delete_workflow_by_state_pattern: ${{ github.event.inputs.delete_workflow_by_state_pattern }}
+          delete_run_by_conclusion_pattern: >-
+            ${{
+              startsWith(github.event.inputs.delete_run_by_conclusion_pattern, 'Unsuccessful:')
+              && 'action_required,cancelled,failure,skipped'
+              || github.event.inputs.delete_run_by_conclusion_pattern
+            }}
+          dry_run: ${{ github.event.inputs.dry_run }}
