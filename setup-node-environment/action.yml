@@ -187,14 +187,6 @@ runs:
         package_json_file: ${{ inputs.working-directory }}/package.json
 
     - uses: actions/setup-node@v5 # https://github.com/actions/setup-node?tab=readme-ov-file#usage
-      if: steps.prepare.outputs.pnpmLockExists == 'true'
-      with:
-        node-version: ${{ steps.prepare.outputs.nodeVersion }}
-        cache: 'pnpm'
-        cache-dependency-path: ${{ inputs.working-directory }}/pnpm-lock.yaml
-
-    - uses: actions/setup-node@v5 # https://github.com/actions/setup-node?tab=readme-ov-file#usage
-      if: steps.prepare.outputs.pnpmLockExists != 'true'
       with:
         node-version: ${{ steps.prepare.outputs.nodeVersion }}
 
@@ -207,6 +199,7 @@ runs:
 
     - id: cache-pnpm-restore
       uses: actions/cache/restore@v4 # https://github.com/actions/cache/blob/main/restore/action.yml
+      if: steps.prepare.outputs.pnpmLockExists == 'true'
       with:
         path: ${{ steps.pnpm-store-dir.outputs.pnpmStoreDir }}
         key: ${{ runner.os }}-pnpm-store-id${{ github.event.repository.id }}-${{ hashFiles('**/pnpm-lock.yaml') }}
@@ -225,7 +218,7 @@ runs:
         echo "🤖---- 缓存命中，安装依赖 ----🤖"
         pnpm install --prefer-offline
         #  --frozen-lockfile
-        # ERR_PNPM_NO_LOCKFILE  Cannot install with "frozen-lockfile" because pnpm-lock.yaml is absent
+        # ERR_PNPM_NO_LOCKFILE  Cannot install with "frozen-lockfile" because pnpm-lock.yaml is absent
 
     - if: steps.cache-pnpm-restore.outputs.cache-hit != 'true'
       working-directory: ${{ inputs.working-directory }}
@@ -233,10 +226,12 @@ runs:
       run: |
         echo "🤖---- 缓存未命中，安装依赖 ----🤖"
         set -x;
-        pnpm fetch # https://pnpm.io/zh/cli/fetch
+        if [ "${{ steps.prepare.outputs.pnpmLockExists }}" == "true" ]; then
+          pnpm fetch # https://pnpm.io/zh/cli/fetch
+        fi
         pnpm install --prefer-offline
         #  --frozen-lockfile
-        # ERR_PNPM_NO_LOCKFILE  Cannot install with "frozen-lockfile" because pnpm-lock.yaml is absent
+        # ERR_PNPM_NO_LOCKFILE  Cannot install with "frozen-lockfile" because pnpm-lock.yaml is absent
         pnpm store prune
 
     - name: 📊 显示缓存命中状态
@@ -245,7 +240,7 @@ runs:
       shell: bash
 
     - id: cache-pnpm-save
-      if: always() && steps.cache-pnpm-restore.outputs.cache-hit != 'true'
+      if: always() && steps.prepare.outputs.pnpmLockExists == 'true' && steps.cache-pnpm-restore.outputs.cache-hit != 'true'
       uses: actions/cache/save@v4
       with:
         path: ${{ steps.pnpm-store-dir.outputs.pnpmStoreDir }}
