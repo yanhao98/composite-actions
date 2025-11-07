@@ -112,6 +112,26 @@ runs:
         # --- 5. 确定 Node.js 版本并清理 .npmrc ---
         echo "::group::⚙️ 确定 Node.js 版本并清理 .npmrc"
         node_version="lts/*" # 默认 Node 版本
+        
+        # 从 pnpm-workspace.yaml 读取 useNodeVersion
+        if [ -f pnpm-workspace.yaml ]; then
+            echo "找到 pnpm-workspace.yaml 文件。"
+            node_version_in_pnpm_workspace=$(sed -n 's/.*useNodeVersion:[[:space:]]*\([0-9.]*\).*/\1/p' pnpm-workspace.yaml | sed 's/[[:space:]]*#.*//')
+            if [ -n "$node_version_in_pnpm_workspace" ]; then
+                node_major_version_in_pnpm_workspace=$(echo "$node_version_in_pnpm_workspace" | cut -d. -f1)
+                if [ -n "$node_major_version_in_pnpm_workspace" ]; then
+                    node_version="$node_major_version_in_pnpm_workspace"
+                    echo "pnpm-workspace.yaml 中指定的 Node 版本: $node_version_in_pnpm_workspace -> 使用主版本: $node_version"
+                else
+                    echo "无法从 pnpm-workspace.yaml ($node_version_in_pnpm_workspace) 提取主 Node 版本。"
+                fi
+            else
+                echo "pnpm-workspace.yaml 中未找到 'useNodeVersion'。"
+            fi
+        else
+            echo "未找到 pnpm-workspace.yaml。"
+        fi
+        
         if [ ! -f .npmrc ]; then
             echo "未找到 .npmrc，创建一个空文件。"
             touch .npmrc
@@ -119,18 +139,20 @@ runs:
             echo "找到 .npmrc 文件。"
         fi
 
-        # 从 .npmrc 读取 use-node-version
-        node_version_in_npmrc=$(sed -n 's/.*use-node-version=\([0-9.]*\).*/\1/p' .npmrc)
-        if [ -n "$node_version_in_npmrc" ]; then
-            node_major_version_in_npmrc=$(echo "$node_version_in_npmrc" | cut -d. -f1)
-            if [ -n "$node_major_version_in_npmrc" ]; then
-                node_version="$node_major_version_in_npmrc"
-                echo ".npmrc 中指定的 Node 版本: $node_version_in_npmrc -> 使用主版本: $node_version"
+        # 从 .npmrc 读取 use-node-version (如果 pnpm-workspace.yaml 未设置版本)
+        if [ "$node_version" == "lts/*" ]; then
+            node_version_in_npmrc=$(sed -n 's/.*use-node-version=\([0-9.]*\).*/\1/p' .npmrc)
+            if [ -n "$node_version_in_npmrc" ]; then
+                node_major_version_in_npmrc=$(echo "$node_version_in_npmrc" | cut -d. -f1)
+                if [ -n "$node_major_version_in_npmrc" ]; then
+                    node_version="$node_major_version_in_npmrc"
+                    echo ".npmrc 中指定的 Node 版本: $node_version_in_npmrc -> 使用主版本: $node_version"
+                else
+                    echo "无法从 .npmrc ($node_version_in_npmrc) 提取主 Node 版本。使用默认值: $node_version"
+                fi
             else
-                echo "无法从 .npmrc ($node_version_in_npmrc) 提取主 Node 版本。使用默认值: $node_version"
+                echo ".npmrc 中未找到 'use-node-version'。使用默认值: $node_version"
             fi
-        else
-            echo ".npmrc 中未找到 'use-node-version'。使用默认值: $node_version"
         fi
 
         # 清理 .npmrc：删除 use-node-version 和 node-mirror 行

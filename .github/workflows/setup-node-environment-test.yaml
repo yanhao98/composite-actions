@@ -60,6 +60,10 @@ jobs:
           - ''
           - |
             use-node-version=22.14.0 # https://pnpm.io/zh/npmrc#use-node-version
+        pnpm_workspace_content:
+          - ''
+          - |
+            useNodeVersion: 24.11.0 # https://pnpm.io/zh/settings#usenodeversion
         lock_file:
           - 'true'
           - 'false'
@@ -72,6 +76,7 @@ jobs:
         run: |
           echo "🤖---- 打印 matrix ----🤖"
           echo "npmrc_content: ${{ matrix.npmrc_content }}"
+          echo "pnpm_workspace_content: ${{ matrix.pnpm_workspace_content }}"
           echo "lock_file: ${{ matrix.lock_file }}"
           echo "cwd: ${{ matrix.cwd }}"
           echo "GITHUB_WORKSPACE: ${{ github.workspace }}"
@@ -95,6 +100,18 @@ jobs:
           ls -l -R .
           pwd
           cat .npmrc
+
+      - name: Create pnpm-workspace.yaml
+        working-directory: ${{ matrix.cwd }}
+        if: matrix.pnpm_workspace_content != ''
+        run: |
+          cat <<EOF > pnpm-workspace.yaml
+          ${{ matrix.pnpm_workspace_content }}
+          EOF
+          set -x;
+          ls -l -R .
+          pwd
+          cat pnpm-workspace.yaml
 
       - name: Create package.json
         working-directory: ${{ matrix.cwd }}
@@ -124,3 +141,46 @@ jobs:
         uses: yanhao98/composite-actions/setup-node-environment@main
         with:
           working-directory: ${{ matrix.cwd }}
+
+      - name: ✅ 验证安装结果
+        working-directory: ${{ matrix.cwd }}
+        run: |
+          echo "🤖---- 验证 Node 和 PNPM 安装 ----🤖"
+          echo "Node 版本: $(node --version)"
+          echo "PNPM 版本: $(pnpm --version)"
+          echo "PNPM 存储路径: $(pnpm store path)"
+          
+          # 验证依赖是否安装
+          if [ -d node_modules ]; then
+            echo "✅ node_modules 已创建"
+            ls -la node_modules/ | head -n 10
+          else
+            echo "❌ node_modules 未找到"
+            # exit 1
+          fi
+          
+          # 验证 Node 版本是否符合预期
+          node_version=$(node --version | cut -d'v' -f2 | cut -d'.' -f1)
+          echo "当前 Node 主版本: $node_version"
+          
+          # 根据配置验证版本
+          if [ -n "${{ matrix.pnpm_workspace_content }}" ]; then
+            echo "预期使用 pnpm-workspace.yaml 中的版本 (24)"
+            if [ "$node_version" != "24" ]; then
+              echo "❌ Node 版本不符合预期，应为 24，实际为 $node_version"
+              # exit 1
+            fi
+          elif [ -n "${{ matrix.npmrc_content }}" ]; then
+            echo "预期使用 .npmrc 中的版本 (22)"
+            if [ "$node_version" != "22" ]; then
+              echo "❌ Node 版本不符合预期，应为 22，实际为 $node_version"
+              # exit 1
+            fi
+          else
+            echo "预期使用默认 LTS 版本"
+            # LTS 版本通常是 20, 22 等偶数版本
+            if [ $((node_version % 2)) -ne 0 ]; then
+              echo "⚠️  警告: Node 版本 $node_version 可能不是 LTS 版本"
+            fi
+          fi
+          echo "✅ Node 版本验证通过"
