@@ -56,25 +56,49 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        npmrc_content:
-          - ''
-          - |
-            use-node-version=22.14.0 # https://pnpm.io/zh/npmrc#use-node-version
-        pnpm_workspace_content:
-          - ''
-          - |
-            useNodeVersion: 24.11.0 # https://pnpm.io/zh/settings#usenodeversion
-        lock_file:
-          - 'true'
-          - 'false'
-        cwd:
-          - ''
-          - 'test'
+        include:
+          - name: "默认配置（LTS Node + lock 文件）"
+            npmrc_content: ''
+            pnpm_workspace_content: ''
+            lock_file: 'true'
+            cwd: ''
+          
+          - name: "默认配置 + 子目录"
+            npmrc_content: ''
+            pnpm_workspace_content: ''
+            lock_file: 'true'
+            cwd: 'test'
+          
+          - name: "使用 .npmrc 指定 Node 22"
+            npmrc_content: |
+              use-node-version=22.14.0 # https://pnpm.io/zh/npmrc#use-node-version
+            pnpm_workspace_content: ''
+            lock_file: 'true'
+            cwd: ''
+          
+          - name: "使用 pnpm-workspace.yaml 指定 Node 24"
+            npmrc_content: ''
+            pnpm_workspace_content: |
+              useNodeVersion: 24.11.0 # https://pnpm.io/zh/settings#usenodeversion
+            lock_file: 'true'
+            cwd: ''
+          
+          - name: "无 lock 文件场景"
+            npmrc_content: ''
+            pnpm_workspace_content: ''
+            lock_file: 'false'
+            cwd: ''
+          
+          - name: "无 lock 文件 + 子目录"
+            npmrc_content: ''
+            pnpm_workspace_content: ''
+            lock_file: 'false'
+            cwd: 'test'
     steps:
       # - uses: actions/checkout@main
-      - name: 打印 matrix
+      - name: 打印测试场景
         run: |
-          echo "🤖---- 打印 matrix ----🤖"
+          echo "🤖---- 测试场景: ${{ matrix.name }} ----🤖"
           echo "npmrc_content: ${{ matrix.npmrc_content }}"
           echo "pnpm_workspace_content: ${{ matrix.pnpm_workspace_content }}"
           echo "lock_file: ${{ matrix.lock_file }}"
