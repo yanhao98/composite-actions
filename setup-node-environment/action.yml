@@ -187,9 +187,16 @@ runs:
         package_json_file: ${{ inputs.working-directory }}/package.json
 
     - uses: actions/setup-node@v5 # https://github.com/actions/setup-node?tab=readme-ov-file#usage
+      if: steps.prepare.outputs.pnpmLockExists == 'true'
       with:
         node-version: ${{ steps.prepare.outputs.nodeVersion }}
-        cache: ''
+        cache: 'pnpm'
+        cache-dependency-path: ${{ inputs.working-directory }}/pnpm-lock.yaml
+
+    - uses: actions/setup-node@v5 # https://github.com/actions/setup-node?tab=readme-ov-file#usage
+      if: steps.prepare.outputs.pnpmLockExists != 'true'
+      with:
+        node-version: ${{ steps.prepare.outputs.nodeVersion }}
 
     - id: pnpm-store-dir
       shell: bash
