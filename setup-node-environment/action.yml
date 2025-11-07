@@ -189,7 +189,7 @@ runs:
     - uses: actions/setup-node@v6 # https://github.com/actions/setup-node?tab=readme-ov-file#usage
       with:
         node-version: ${{ steps.prepare.outputs.nodeVersion }}
-        package-manager-cache: true
+        package-manager-cache: false
 
     - id: pnpm-store-dir
       shell: bash
