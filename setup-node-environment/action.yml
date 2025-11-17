@@ -233,7 +233,8 @@ runs:
         pnpm install --prefer-offline
         #  --frozen-lockfile
         # ERR_PNPM_NO_LOCKFILE  Cannot install with "frozen-lockfile" because pnpm-lock.yaml is absent
-        pnpm store prune
+        pnpm store prune || true
+        # https://github.com/pnpm/pnpm/issues/10131#issuecomment-3528934120
 
     - name: 📊 显示缓存命中状态
       run: |
