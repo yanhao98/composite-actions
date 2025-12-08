@@ -43,6 +43,15 @@ runs:
       shell: bash
       working-directory: ${{ inputs.working-directory }}
       run: |
+        # 🤖---- 备份 .npmrc 状态 ----🤖 #
+        if [ -f .npmrc ]; then
+            echo "备份现有的 .npmrc 到 .npmrc.action-backup"
+            cp .npmrc .npmrc.action-backup
+        else
+            echo "标记 .npmrc 原本不存在"
+            touch .npmrc.was-missing
+        fi
+
         # 🤖---- 准备环境变量 ----🤖 #
 
         # --- 1. 包管理器 ---
@@ -247,6 +256,21 @@ runs:
       with:
         path: ${{ steps.pnpm-store-dir.outputs.pnpmStoreDir }}
         key: ${{ steps.cache-pnpm-restore.outputs.cache-primary-key }}
+
+    - name: 🧹 恢复 .npmrc
+      if: always()
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: |
+        echo "🤖---- 恢复 .npmrc ----🤖"
+        if [ -f .npmrc.action-backup ]; then
+            echo "恢复备份的 .npmrc"
+            mv .npmrc.action-backup .npmrc
+        elif [ -f .npmrc.was-missing ]; then
+            echo "删除生成的 .npmrc (原本不存在)"
+            rm -f .npmrc
+            rm .npmrc.was-missing
+        fi
 # rm -r node_modules
 # pnpm fetch
 # pnpm install --offline
