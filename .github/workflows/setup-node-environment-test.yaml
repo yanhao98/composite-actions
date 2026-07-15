@@ -31,7 +31,7 @@ jobs:
     outputs:
       lock_file_content: ${{ steps.generate_lock.outputs.lock_file_content }}
     steps:
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
         with:
           version: latest
           standalone: true
