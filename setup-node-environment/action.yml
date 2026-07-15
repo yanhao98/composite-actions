@@ -187,7 +187,7 @@ runs:
         printf "  %-16s %s\n" "nodeVersion:" "${node_version}"
         echo "::endgroup::"
 
-    - uses: pnpm/action-setup@v4 # https://github.com/pnpm/action-setup?tab=readme-ov-file#inputs
+    - uses: pnpm/action-setup@v6 # https://github.com/pnpm/action-setup?tab=readme-ov-file#inputs
       if: steps.prepare.outputs.pnpmInstalled == 'false'
       with:
         # https://github.com/pnpm/action-setup/blob/master/action.yml
@@ -195,7 +195,7 @@ runs:
         standalone: ${{ inputs.pnpm_standalone }}
         package_json_file: ${{ inputs.working-directory }}/package.json
 
-    - uses: actions/setup-node@v6 # https://github.com/actions/setup-node?tab=readme-ov-file#usage
+    - uses: actions/setup-node@v7 # https://github.com/actions/setup-node?tab=readme-ov-file#usage
       with:
         node-version: ${{ steps.prepare.outputs.nodeVersion }}
         package-manager-cache: false
@@ -208,7 +208,7 @@ runs:
         echo "pnpmStoreDir=$(pnpm store path)" >> $GITHUB_OUTPUT
 
     - id: cache-pnpm-restore
-      uses: actions/cache/restore@v4 # https://github.com/actions/cache/blob/main/restore/action.yml
+      uses: actions/cache/restore@v6 # https://github.com/actions/cache/blob/main/restore/action.yml
       if: steps.prepare.outputs.pnpmLockExists == 'true'
       with:
         path: ${{ steps.pnpm-store-dir.outputs.pnpmStoreDir }}
@@ -252,7 +252,7 @@ runs:
 
     - id: cache-pnpm-save
       if: always() && steps.prepare.outputs.pnpmLockExists == 'true' && steps.cache-pnpm-restore.outputs.cache-hit != 'true'
-      uses: actions/cache/save@v4
+      uses: actions/cache/save@v6
       with:
         path: ${{ steps.pnpm-store-dir.outputs.pnpmStoreDir }}
         key: ${{ steps.cache-pnpm-restore.outputs.cache-primary-key }}
