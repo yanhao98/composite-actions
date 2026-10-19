@@ -1,0 +1,93 @@
+name: 'Setup Skopeo'
+description: '安装并配置 Skopeo CLI（优先 APT 源安装带重试，失败自动 Fallback 至固定 SHA256 校验的预编译二进制）'
+author: 'yanhao98'
+
+inputs:
+  version:
+    description: '二进制回退时使用的 Skopeo 版本'
+    required: false
+    default: 'v1.23.0'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: 检查并安装 Skopeo
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        if command -v skopeo >/dev/null 2>&1; then
+          echo "skopeo is already installed"
+          skopeo --version
+          exit 0
+        fi
+
+        # Ubuntu ARM 官方源曾连续超时；先切换 HTTPS，再对完整的 update+install 做三轮重试
+        if [ -f /etc/apt/sources.list ]; then
+          sed -i 's#http://ports.ubuntu.com/ubuntu-ports#https://ports.ubuntu.com/ubuntu-ports#g' /etc/apt/sources.list
+        fi
+        for source_file in /etc/apt/sources.list.d/*.sources; do
+          [ -e "$source_file" ] || continue
+          sed -i 's#http://ports.ubuntu.com/ubuntu-ports#https://ports.ubuntu.com/ubuntu-ports#g' "$source_file"
+        done
+
+        apt_installed=false
+        for attempt in 1 2 3; do
+          echo "apt 安装 skopeo：第 ${attempt}/3 次"
+          if apt-get \
+              -o Acquire::Retries=1 \
+              -o Acquire::http::Timeout=20 \
+              -o Acquire::https::Timeout=20 \
+              update -qq \
+            && DEBIAN_FRONTEND=noninteractive apt-get \
+              -o Acquire::Retries=1 \
+              -o Acquire::http::Timeout=20 \
+              -o Acquire::https::Timeout=20 \
+              install -qq -y --no-install-recommends skopeo; then
+            apt_installed=true
+            break
+          fi
+
+          if [ "$attempt" -lt 3 ]; then
+            if [ "$attempt" -eq 1 ]; then
+              sleep 10
+            else
+              sleep 30
+            fi
+          fi
+        done
+
+        if [ "$apt_installed" != true ]; then
+          echo "apt 连续安装失败，启用固定 SHA256 的二进制 fallback"
+          version="${{ inputs.version }}"
+          case "$(uname -m)" in
+            x86_64|amd64)
+              arch="amd64"
+              expected_sha256="15696e068c02a163e20013fab79f40cdc6c8022d99e1aee8676f6d540404691a"
+              ;;
+            aarch64|arm64)
+              arch="arm64"
+              expected_sha256="071ac4bf63c76d10de6dde23a28348671e9b1427123e966640782b5b68204223"
+              ;;
+            *)
+              echo "不支持的 Runner 架构：$(uname -m)" >&2
+              exit 1
+              ;;
+          esac
+
+          binary_path="$(mktemp)"
+          trap 'rm -f "$binary_path"' EXIT
+          curl \
+            --fail \
+            --location \
+            --retry 5 \
+            --retry-all-errors \
+            --connect-timeout 10 \
+            --max-time 180 \
+            "https://github.com/lework/skopeo-binary/releases/download/${version}/skopeo-linux-${arch}" \
+            --output "$binary_path"
+          printf '%s  %s\n' "$expected_sha256" "$binary_path" | sha256sum --check --strict -
+          install -m 0755 "$binary_path" /usr/local/bin/skopeo
+        fi
+
+        skopeo --version
