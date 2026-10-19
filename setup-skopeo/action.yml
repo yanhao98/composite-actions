@@ -1,10 +1,10 @@
 name: 'Setup Skopeo'
-description: '安装并配置 Skopeo CLI（优先 APT 源安装带重试，失败自动 Fallback 至固定 SHA256 校验的预编译二进制）'
+description: '安装并配置 Skopeo CLI（优先 APT 源安装带重试，失败自动 Fallback 至动态拉取 SHA256 严格校验的预编译二进制）'
 author: 'yanhao98'
 
 inputs:
   version:
-    description: '二进制回退时使用的 Skopeo 版本'
+    description: '二进制回退时使用的 Skopeo 版本（默认 v1.23.0）'
     required: false
     default: 'v1.23.0'
 
@@ -58,16 +58,14 @@ runs:
         done
 
         if [ "$apt_installed" != true ]; then
-          echo "apt 连续安装失败，启用固定 SHA256 的二进制 fallback"
+          echo "apt 连续安装失败，启用动态 SHA256 校验的预编译二进制 fallback"
           version="${{ inputs.version }}"
           case "$(uname -m)" in
             x86_64|amd64)
               arch="amd64"
-              expected_sha256="15696e068c02a163e20013fab79f40cdc6c8022d99e1aee8676f6d540404691a"
               ;;
             aarch64|arm64)
               arch="arm64"
-              expected_sha256="071ac4bf63c76d10de6dde23a28348671e9b1427123e966640782b5b68204223"
               ;;
             *)
               echo "不支持的 Runner 架构：$(uname -m)" >&2
@@ -75,8 +73,13 @@ runs:
               ;;
           esac
 
+          base_url="https://github.com/lework/skopeo-binary/releases/download/${version}/skopeo-linux-${arch}"
           binary_path="$(mktemp)"
-          trap 'rm -f "$binary_path"' EXIT
+          checksum_path="$(mktemp)"
+          trap 'rm -f "$binary_path" "$checksum_path"' EXIT
+
+          # 1. 下载二进制文件
+          echo "正在下载 Skopeo 二进制包 (${version}, linux/${arch}) ..."
           curl \
             --fail \
             --location \
@@ -84,9 +87,31 @@ runs:
             --retry-all-errors \
             --connect-timeout 10 \
             --max-time 180 \
-            "https://github.com/lework/skopeo-binary/releases/download/${version}/skopeo-linux-${arch}" \
+            "${base_url}" \
             --output "$binary_path"
+
+          # 2. 动态下载上游对应版本的 SHA256 校验文件
+          echo "正在下载对应版本的 SHA256 校验文件 ..."
+          curl \
+            --fail \
+            --location \
+            --retry 5 \
+            --retry-all-errors \
+            --connect-timeout 10 \
+            --max-time 60 \
+            "${base_url}.sha256" \
+            --output "$checksum_path"
+
+          # 3. 严格比对哈希值，确保文件未损坏且未被篡改
+          expected_sha256="$(awk '{print $1}' "$checksum_path")"
+          if [ -z "$expected_sha256" ]; then
+            echo "未能从上游获取到有效的 SHA256 校验码" >&2
+            exit 1
+          fi
+
           printf '%s  %s\n' "$expected_sha256" "$binary_path" | sha256sum --check --strict -
+          echo "SHA256 校验通过：${expected_sha256}"
+
           install -m 0755 "$binary_path" /usr/local/bin/skopeo
         fi
 
