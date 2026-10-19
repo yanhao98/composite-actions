@@ -4,9 +4,9 @@ author: 'yanhao98'
 
 inputs:
   version:
-    description: '二进制回退时使用的 Skopeo 版本（默认 v1.23.0）'
+    description: '二进制回退时使用的 Skopeo 版本（默认 latest）'
     required: false
-    default: 'v1.23.0'
+    default: 'latest'
 
 runs:
   using: 'composite'
@@ -73,13 +73,20 @@ runs:
               ;;
           esac
 
-          base_url="https://github.com/lework/skopeo-binary/releases/download/${version}/skopeo-linux-${arch}"
+          if [ "$version" = "latest" ] || [ -z "$version" ]; then
+            base_url="https://github.com/lework/skopeo-binary/releases/latest/download/skopeo-linux-${arch}"
+            version_display="latest"
+          else
+            base_url="https://github.com/lework/skopeo-binary/releases/download/${version}/skopeo-linux-${arch}"
+            version_display="${version}"
+          fi
+
           binary_path="$(mktemp)"
           checksum_path="$(mktemp)"
           trap 'rm -f "$binary_path" "$checksum_path"' EXIT
 
           # 1. 下载二进制文件
-          echo "正在下载 Skopeo 二进制包 (${version}, linux/${arch}) ..."
+          echo "正在下载 Skopeo 二进制包 (${version_display}, linux/${arch}) ..."
           curl \
             --fail \
             --location \
