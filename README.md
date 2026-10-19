@@ -60,6 +60,7 @@ jobs:
 - **`docker-build-push`**: Builds and pushes Docker images.
 - **`npm-build-fix-to-nexus`**: Builds and fixes NPM packages for Nexus.
 - **`setup-node-environment`**: Sets up a Node.js environment.
+- **`cleanup-releases`**: Automatically cleans up old Releases and associated tags (compatible with Gitea and GitHub).
 - **`setup-skopeo`**: Sets up Skopeo CLI with APT retries and verified binary fallback.
 - **`upload-to-alist`**: Uploads files to Alist.
 
